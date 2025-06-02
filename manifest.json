@@ -3,31 +3,31 @@
   "files": [
     {
       "path": "core/config.py",
-      "url": "http://192.168.0.102/parser/core/config.py"
+      "url": "https://raw.githubusercontent.com/PankovD/WLM/refs/heads/main/core/config.py"
     },
     {
       "path": "core/constants.py",
-      "url": "http://192.168.0.102/parser/core/constants.py"
+      "url": "https://raw.githubusercontent.com/PankovD/WLM/refs/heads/main/core/constants.py"
     },
     {
       "path": "core/gui.py",
-      "url": "http://192.168.0.102/parser/core/gui.py"
+      "url": "https://raw.githubusercontent.com/PankovD/WLM/refs/heads/main/core/gui.py"
     },
     {
       "path": "core/io_utils.py",
-      "url": "http://192.168.0.102/parser/core/io_utils.py"
+      "url": "https://raw.githubusercontent.com/PankovD/WLM/refs/heads/main/core/io_utils.py"
     },
     {
       "path": "core/network.py",
-      "url": "http://192.168.0.102/parser/core/network.py"
+      "url": "https://raw.githubusercontent.com/PankovD/WLM/refs/heads/main/core/network.py"
     },
     {
       "path": "core/processing.py",
-      "url": "http://192.168.0.102/parser/core/processing.py"
+      "url": "https://raw.githubusercontent.com/PankovD/WLM/refs/heads/main/processing.py"
     },
     {
       "path": "core/main.py",
-      "url": "http://192.168.0.102/parser/core/main.py"
+      "url": "https://raw.githubusercontent.com/PankovD/WLM/refs/heads/main/main.py"
     }
   ]
 }
