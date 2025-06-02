@@ -3,35 +3,35 @@
   "files": [
     {
       "path": "core/__init__.py",
-      "url": "https://raw.githubusercontent.com/PankovD/WLM/refs/heads/main/core/__init__.py"
+      "url": "https://raw.githubusercontent.com/PankovD/WLM/main/core/__init__.py"
     },    
     {
       "path": "core/config.py",
-      "url": "https://raw.githubusercontent.com/PankovD/WLM/refs/heads/main/core/config.py"
+      "url": "https://raw.githubusercontent.com/PankovD/WLM/main/core/config.py"
     },
     {
       "path": "core/constants.py",
-      "url": "https://raw.githubusercontent.com/PankovD/WLM/refs/heads/main/core/constants.py"
+      "url": "https://raw.githubusercontent.com/PankovD/WLM/main/core/constants.py"
     },
     {
       "path": "core/gui.py",
-      "url": "https://raw.githubusercontent.com/PankovD/WLM/refs/heads/main/core/gui.py"
+      "url": "https://raw.githubusercontent.com/PankovD/WLM/main/core/gui.py"
     },
     {
       "path": "core/io_utils.py",
-      "url": "https://raw.githubusercontent.com/PankovD/WLM/refs/heads/main/core/io_utils.py"
+      "url": "https://raw.githubusercontent.com/PankovD/WLM/main/core/io_utils.py"
     },
     {
       "path": "core/network.py",
-      "url": "https://raw.githubusercontent.com/PankovD/WLM/refs/heads/main/core/network.py"
+      "url": "https://raw.githubusercontent.com/PankovD/WLM/main/core/network.py"
     },
     {
       "path": "core/processing.py",
-      "url": "https://raw.githubusercontent.com/PankovD/WLM/refs/heads/main/core/processing.py"
+      "url": "https://raw.githubusercontent.com/PankovD/WLM/main/core/processing.py"
     },
     {
       "path": "core/main.py",
-      "url": "https://raw.githubusercontent.com/PankovD/WLM/refs/heads/main/core/main.py"
+      "url": "https://raw.githubusercontent.com/PankovD/WLM/main/core/main.py"
     }
   ]
 }
