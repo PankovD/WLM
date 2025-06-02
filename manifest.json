@@ -1,6 +1,6 @@
 {
-  "version": "0.0.7",
-  "description": "First multimodule version of program.",
+  "version": "0.0.8",
+  "description": "First multimodule version of program. And green buttons :)",
   "files": [
     {
       "path": "core/__init__.py",
