@@ -30,7 +30,7 @@ def choose_mode():
     container = tk.Frame(win, bg='white', padx=20, pady=20)
     container.pack(expand=True, fill='both')
 
-    head = ttk.Label(container, text="TESTChoose search mode", font=("Segoe UI", 14, "bold"), background='white')
+    head = ttk.Label(container, text="Choose search mode", font=("Segoe UI", 14, "bold"), background='white')
     head.pack(pady=(0, 15))
     lbl = ttk.Label(container, text="Search by:", font=("Segoe UI", 12), background='white')
     lbl.pack(pady=(0, 15))
