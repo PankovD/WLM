@@ -2,6 +2,10 @@
   "version": "0.0.6",
   "files": [
     {
+      "path": "core/__init__.py",
+      "url": "https://raw.githubusercontent.com/PankovD/WLM/refs/heads/main/core/__init__.py"
+    },    
+    {
       "path": "core/config.py",
       "url": "https://raw.githubusercontent.com/PankovD/WLM/refs/heads/main/core/config.py"
     },
