@@ -43,7 +43,7 @@ def choose_mode():
     s.theme_use('alt')
     s.configure('Custom.TButton',
                 font=('Cascadia Code', 10, 'bold'),
-                background="#3E88FF",
+                background="#4BAE00",
                 foreground='white',
                 padding=(10, 10))
     s.map('Custom.TButton',
