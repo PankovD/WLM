@@ -15,7 +15,7 @@
     },
     {
       "path": "core/gui.py",
-      "url": "https://raw.githubusercontent.com/PankovD/WLM/refs/heads/main/core/gui.py"
+      "url": "https://raw.githubusercontent.com/PankovD/WLM/main/core/gui.py"
     },
     {
       "path": "core/io_utils.py",
