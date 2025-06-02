@@ -43,11 +43,11 @@ def choose_mode():
     s.theme_use('alt')
     s.configure('Custom.TButton',
                 font=('Cascadia Code', 10, 'bold'),
-                background="#4BAE00",
+                background="#0052D5",
                 foreground='white',
                 padding=(10, 10))
     s.map('Custom.TButton',
-        background=[('active', "#0D3D8A")],  # при наведенні
+        background=[('active', "#0060FB")],  # при наведенні
         foreground=[('active', 'white')])
     
     btn_upc = ttk.Button(container, text="UPC/EAN", width = 20, style='Custom.TButton', command=lambda: set_and_close('upc'))
