@@ -23,11 +23,11 @@
     },
     {
       "path": "core/processing.py",
-      "url": "https://raw.githubusercontent.com/PankovD/WLM/refs/heads/main/processing.py"
+      "url": "https://raw.githubusercontent.com/PankovD/WLM/refs/heads/main/core/processing.py"
     },
     {
       "path": "core/main.py",
-      "url": "https://raw.githubusercontent.com/PankovD/WLM/refs/heads/main/main.py"
+      "url": "https://raw.githubusercontent.com/PankovD/WLM/refs/heads/main/core/main.py"
     }
   ]
 }
