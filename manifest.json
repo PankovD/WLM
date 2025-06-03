@@ -1,6 +1,6 @@
 {
-  "version": "0.0.8",
-  "description": "First multimodule version of program. And green buttons :)",
+  "version": "0.0.9",
+  "description": "First multimodule version of program. Queue fix. 'blocked' fix. Faster parsing. Additional HTML headers.",
   "files": [
     {
       "path": "core/__init__.py",
