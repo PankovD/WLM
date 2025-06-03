@@ -49,7 +49,7 @@ def run_app():
 
     # Consumers
     consumers = []
-    for _ in range(2):
+    for _ in range(3):
         t = threading.Thread(target=consumer_worker,
                               args=(id_queue, excel_queue, column_names, results_file, status))
         t.start()
