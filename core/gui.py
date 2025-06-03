@@ -149,16 +149,15 @@ def show_progress_bar(total_count, progress_queue, finish_callback):
 
     progress_label = ttk.Label(root, text=f"0 / {total_count} items processed", font=("Segoe UI", 10))
     progress_label.pack()
-    
+
     timer_label = ttk.Label(root, text="Total runtime: 00:00:00", font=("Segoe UI", 10))
     timer_label.pack(pady=(5, 5))
     start_time = time.time()
-    
+
     def format_elapsed(seconds):
         h, rem = divmod(int(seconds), 3600)
         m, s = divmod(rem, 60)
         return f"{h:02}:{m:02}:{s:02}"
-    
 
     processed_count = 0
 
@@ -166,17 +165,25 @@ def show_progress_bar(total_count, progress_queue, finish_callback):
         nonlocal processed_count
         try:
             while True:
-                progress_queue.get_nowait()
-                processed_count += 1
+                item = progress_queue.get_nowait()
+                progress_queue.task_done()
+                # Якщо отримали None — це фінальний сигнал
+                if item is None:
+                    root.destroy()
+                    finish_callback()
+                    return
+                # Інакше item має бути 1 (крок прогресу)
+                processed_count += item
         except Empty:
             pass
 
         progressbar['value'] = processed_count
         progress_label.config(text=f"{processed_count} / {total_count} items processed")
-        
+
         elapsed_seconds = time.time() - start_time
         timer_label.config(text=f"Total runtime: {format_elapsed(elapsed_seconds)}")
 
+        # Якщо вже досягли або перевищили total_count, завершити
         if processed_count >= total_count:
             root.destroy()
             finish_callback()
