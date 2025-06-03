@@ -135,13 +135,13 @@ def collect_ids(id_queue, excel_queue, selected_file, upc_col, price_col, column
 
     # Закінчили — сповіщаємо споживачів
 
-    id_queue.put(None)
 
     # Закриваємо файли
     writer_file.close()
     if selected_file.lower().endswith('.csv'):
         infile.close()
-
+        
+    return
 
 # ------------------- Producer: Збір із файлу по ID -------------------
 def load_ids_from_file(id_queue, selected_file, id_col, price_col, column_names):
@@ -222,8 +222,9 @@ def consumer_worker(id_queue, excel_queue, column_names, results_file, status=No
                     logging.warning(
                         f"Blocked for UPC {original.get('UPC','')}, re-enqueueing once"
                     )
-                    id_queue.put((product_id, original))
                     id_queue.task_done()
+                    id_queue.put((product_id, original))
+                    
                     time.sleep(180)    # “охолоджування”
                     break             # вихід із for — повернемося до while, щоб взяти наступний item
 
