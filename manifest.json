@@ -1,6 +1,6 @@
 {
-  "version": "0.0.9",
-  "description": "First multimodule version of program. Queue fix. 'blocked' fix. Faster parsing. Additional HTML headers.",
+  "version": "0.0.10",
+  "description": "Progressbar fix. Queue fix. 'blocked' fix. Faster parsing. Additional HTML headers.",
   "files": [
     {
       "path": "core/__init__.py",
