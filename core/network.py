@@ -45,6 +45,6 @@ def is_blocked(response):
     if response.status_code == 200:
         if "/blocked?" in str(response.url):
             return True
-        if "Robot Check" in response.text or "blocked" in response.text.lower():
+        if "Robot Check" in response.text or "/blocked?" in response.text.lower():
             return True
     return False
