@@ -204,19 +204,23 @@ def consumer_worker(id_queue, excel_queue, column_names, results_file, status=No
                 break
 
             product_id, original = raw
-            product_url = f'https://www.walmart.com/ip/{product_id}?redirect=false'
             success = False
+            blocked = False
+
+            # ↓ Винесемо product_url назовні, щоб можна було його перезаписати
+            product_url = f'https://www.walmart.com/ip/{product_id}?redirect=false'
 
             for attempt in range(3):
                 try:
+                    # ↓ Тепер беремо request саме по product_url (а не щодового формування f-string)
                     r = client.get(product_url,
                                    headers=BASE_HEADERS[h_index],
                                    follow_redirects=False)
                 except httpx.RequestError:
                     wait_for_connection()
-                    continue
+                    continue  # йдемо до наступної спроби із поточним product_url
 
-                # Якщо побачили блокування — перекидаємо назад в чергу й йдемо до наступного
+                # Якщо побачили блокування — повертаємо в чергу і виходимо
                 if is_blocked(r):
                     blocks += 1
                     logging.warning(
@@ -224,38 +228,43 @@ def consumer_worker(id_queue, excel_queue, column_names, results_file, status=No
                     )
                     id_queue.task_done()
                     id_queue.put((product_id, original))
-                    
-                    time.sleep(180)    # “охолоджування”
-                    break             # вихід із for — повернемося до while, щоб взяти наступний item
+                    time.sleep(180)
+                    blocked = True
+                    break
 
-                # Обробка редиректів
+                # Якщо статус 301/302/… — поновлюємо product_url на поточну Location та пробуємо ще раз
                 if r.status_code in (301, 302, 303, 307, 308):
-                    product_url = urljoin("https://www.walmart.com",
-                                          r.headers.get("Location"))
-                    continue
+                    # ↓ тут беремо зворот URL із заголовка іще раз запитом
+                    new_location = r.headers.get("Location")
+                    if new_location:
+                        # Якщо Location видається відносним, додаємо домен вручну
+                        product_url = urljoin("https://www.walmart.com", new_location)
+                    continue  # переходимо до наступного attempt уже з оновленим product_url
 
                 if r.status_code != 200:
-                    continue
+                    continue  # жодної дії, просто спроба неуспішна, але без редиректу
 
-                # Якщо дійшли сюди — успішно завантажили і можемо парсити
+                # ↓ УСПІШНО отримали HTML, переходимо до парсингу
                 sel = Selector(text=r.text)
                 data_str = sel.xpath('//script[@id="__NEXT_DATA__"]/text()').get()
                 if not data_str:
                     continue
                 data_json = json.loads(data_str)
-                prod = (data_json.get("props", {})
-                             .get("pageProps", {})
-                             .get("initialData", {})
-                             .get("data", {})
-                             .get("product", {}))
+                prod = (
+                    data_json.get("props", {})
+                              .get("pageProps", {})
+                              .get("initialData", {})
+                              .get("data", {})
+                              .get("product", {})
+                )
                 if not prod:
                     continue
 
-                # Формуємо рядок у excel_queue
+                # ↓ Зібрали всі потрібні поля, складаємо рядок і кидаємо його в excel_queue
                 price_info = prod.get('priceInfo') or {}
                 current = price_info.get('currentPrice') or {}
                 row_data = {
-                    'Store Page': product_url,
+                    'Store Page': product_url.replace("?redirect=false", ""),
                     'Catalog Page': f"https://seller.walmart.com/catalog/add-items?search={original.get('UPC','')}",
                     'Product Title': prod.get('name'),
                     'Product ID': prod.get('usItemId'),
@@ -268,18 +277,21 @@ def consumer_worker(id_queue, excel_queue, column_names, results_file, status=No
                     'PRICE': original.get('Price',''),
                     **{col: original.get(col,'') for col in column_names}
                 }
-                row = [row_data.get(h, '') for h in result_header + column_names]
+                row = [row_data.get(h, '') for h in RESULT_HEADER + column_names]
                 excel_queue.put(row)
 
                 success = True
-                break  # вийшли з attempts
+                break  # вдалий парсинг, виходимо з attempts
 
-            # Якщо вдалося — відзначаємо виконання task_done і йдемо далі
+            if blocked:
+                # Якщо був блок, уже зробили task_done/put → просто продовжуємо
+                continue
+
             if success:
                 id_queue.task_done()
                 continue
 
-            # Якщо не успішно (після 3 спроб без блокування) — лог і task_done
+            # Якщо 3 спроби не дали результат (й ми не були заблоковані), фіксуємо помилку та закриваємо задачу
             logging.error(f"Failed to process item {product_id} after 3 attempts")
             id_queue.task_done()
 
