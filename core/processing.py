@@ -195,7 +195,6 @@ def writer_worker(excel_queue, file_write_lock, results_file, column_names, prog
     
     if progress_queue:
         progress_queue.put(None)
-
 # ------------------- Consumer: Парсинг сторінок -------------------
 def consumer_worker(id_queue, excel_queue, column_names, results_file, status=None):
     h_index = 0
