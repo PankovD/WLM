@@ -170,17 +170,17 @@ total_rows_lock = threading.Lock()
 
 def writer_worker(excel_queue, file_write_lock, results_file, column_names, progress_queue=None, status=None):
     global total_rows_written
-
+    UPC_INDEX = RESULT_HEADER.index("UPC")
     ws.append(RESULT_HEADER + column_names)
     wb.save(results_file)
     while True:
         row = excel_queue.get()
-        UPC_INDEX = RESULT_HEADER.index("UPC")
-        upc = row[UPC_INDEX]
         if row is None:
             excel_queue.task_done()
             break
         with file_write_lock:
+            upc = row[UPC_INDEX] if len(row) > UPC_INDEX else "N/A"
+            logging.info(f"Row {upc} written to Excel.")
             ws.append(row)
             wb.save(results_file)
             with total_rows_lock:
@@ -196,7 +196,6 @@ def writer_worker(excel_queue, file_write_lock, results_file, column_names, prog
     
     if progress_queue:
         progress_queue.put(None)
-
 # ------------------- Consumer: Парсинг сторінок -------------------
 def consumer_worker(id_queue, excel_queue, column_names, results_file, status=None):
     h_index = 0
