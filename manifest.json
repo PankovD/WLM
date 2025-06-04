@@ -1,38 +1,38 @@
 {
   "version": "0.0.11",
-  "description": "Saving results file in the same folder with input file.",
+  "description": "Results file saving in the save folder with input file.",
   "files": [
     {
       "path": "core/__init__.py",
-      "url": "https://raw.githubusercontent.com/PankovD/WLM/develop/core/__init__.py"
+      "url": "https://raw.githubusercontent.com/PankovD/WLM/main/core/__init__.py"
     },    
     {
       "path": "core/config.py",
-      "url": "https://raw.githubusercontent.com/PankovD/WLM/develop/core/config.py"
+      "url": "https://raw.githubusercontent.com/PankovD/WLM/main/core/config.py"
     },
     {
       "path": "core/constants.py",
-      "url": "https://raw.githubusercontent.com/PankovD/WLM/develop/core/constants.py"
+      "url": "https://raw.githubusercontent.com/PankovD/WLM/main/core/constants.py"
     },
     {
       "path": "core/gui.py",
-      "url": "https://raw.githubusercontent.com/PankovD/WLM/develop/core/gui.py"
+      "url": "https://raw.githubusercontent.com/PankovD/WLM/main/core/gui.py"
     },
     {
       "path": "core/io_utils.py",
-      "url": "https://raw.githubusercontent.com/PankovD/WLM/develop/core/io_utils.py"
+      "url": "https://raw.githubusercontent.com/PankovD/WLM/main/core/io_utils.py"
     },
     {
       "path": "core/network.py",
-      "url": "https://raw.githubusercontent.com/PankovD/WLM/develop/core/network.py"
+      "url": "https://raw.githubusercontent.com/PankovD/WLM/main/core/network.py"
     },
     {
       "path": "core/processing.py",
-      "url": "https://raw.githubusercontent.com/PankovD/WLM/develop/core/processing.py"
+      "url": "https://raw.githubusercontent.com/PankovD/WLM/main/core/processing.py"
     },
     {
       "path": "core/main.py",
-      "url": "https://raw.githubusercontent.com/PankovD/WLM/develop/core/main.py"
+      "url": "https://raw.githubusercontent.com/PankovD/WLM/main/core/main.py"
     }
   ]
 }
