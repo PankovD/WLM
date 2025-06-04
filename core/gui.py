@@ -100,12 +100,21 @@ def choose_file_and_columns(id_mode=False):
     y = (screen_height // 2) - (height // 2)
     column_window.geometry(f"{width}x{height}+{x}+{y}")
     column_names = df.columns.tolist()
+    
+    s = ttk.Style(column_window)
+    s.theme_use('clam')
+    s.configure(
+        'White.TLabel',
+        background='white',
+        font=('Segoe UI', 11)
+    )
+
     label_text = "Select the column that contains Item ID:" if id_mode else "Select the column that contains UPC/EAN:"
-    tk.Label(column_window, text=label_text,font=("Segoe UI", 11, "bold")).pack(pady=10)
+    ttk.Label(column_window, text=label_text,style=("White.TLabel")).pack(pady=10)
     id_dropdown = ttk.Combobox(column_window, values=column_names)
     id_dropdown.pack(pady=5)
     id_dropdown.current(0)
-    tk.Label(column_window, text="Select the column that contains Price (optional):",font=("Segoe UI", 11)).pack(pady=5)
+    ttk.Label(column_window, text="Select the column that contains Price (optional):",style=("White.TLabel")).pack(pady=5)
     price_dropdown = ttk.Combobox(column_window, values=["<None>"] + column_names)
     price_dropdown.pack(pady=5)
     price_dropdown.current(0)
@@ -117,8 +126,6 @@ def choose_file_and_columns(id_mode=False):
         column_window.quit()
         column_window.destroy()
 
-    s = ttk.Style(column_window)
-    s.theme_use('clam')
     s.configure('Custom.TButton',
                 font=('Cascadia Code', 10, 'bold'),
                 background="#00B32A",
