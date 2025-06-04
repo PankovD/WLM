@@ -116,11 +116,11 @@ def choose_file_and_columns(id_mode=False):
     )
 
     label_text = "Select the column that contains Item ID:" if id_mode else "Select the column that contains UPC/EAN:"
-    ttk.Label(column_window, text=label_text,style=("White.TLabel")).pack(pady=10)
+    ttk.Label(column_window, text=label_text,style=("WhiteBold.TLabel")).pack(pady=10)
     id_dropdown = ttk.Combobox(column_window, values=column_names)
     id_dropdown.pack(pady=5)
     id_dropdown.current(0)
-    ttk.Label(column_window, text="Select the column that contains Price (optional):",style=("WhiteBold.TLabel")).pack(pady=5)
+    ttk.Label(column_window, text="Select the column that contains Price (optional):",style=("White.TLabel")).pack(pady=5)
     price_dropdown = ttk.Combobox(column_window, values=["<None>"] + column_names)
     price_dropdown.pack(pady=5)
     price_dropdown.current(0)
