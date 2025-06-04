@@ -170,10 +170,13 @@ total_rows_lock = threading.Lock()
 
 def writer_worker(excel_queue, file_write_lock, results_file, column_names, progress_queue=None, status=None):
     global total_rows_written
+
     ws.append(RESULT_HEADER + column_names)
     wb.save(results_file)
     while True:
         row = excel_queue.get()
+        UPC_INDEX = RESULT_HEADER.index("UPC")
+        upc = row[UPC_INDEX]
         if row is None:
             excel_queue.task_done()
             break
@@ -187,7 +190,7 @@ def writer_worker(excel_queue, file_write_lock, results_file, column_names, prog
                 if progress_queue:
                     progress_queue.put(1)
                 print(f"\rTotal rows written: {total_rows_written}", end="", flush=True)
-            logging.info("Row written to Excel.")
+            logging.info(f"Row {upc} written to Excel.")
             
         excel_queue.task_done()
     
