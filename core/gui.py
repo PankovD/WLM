@@ -92,6 +92,7 @@ def choose_file_and_columns(id_mode=False):
     column_window.title("Select Columns")
     column_window.resizable(False, False)
     column_window.attributes('-topmost', True)
+    column_window.configure(bg='white')
     width, height = 500, 250
     column_window.update_idletasks()
     screen_width = column_window.winfo_screenwidth()
@@ -108,13 +109,18 @@ def choose_file_and_columns(id_mode=False):
         background='white',
         font=('Segoe UI', 11)
     )
+    s.configure(
+        'WhiteBold.TLabel',
+        background='white',
+        font=('Segoe UI', 11, 'bold')
+    )
 
     label_text = "Select the column that contains Item ID:" if id_mode else "Select the column that contains UPC/EAN:"
     ttk.Label(column_window, text=label_text,style=("White.TLabel")).pack(pady=10)
     id_dropdown = ttk.Combobox(column_window, values=column_names)
     id_dropdown.pack(pady=5)
     id_dropdown.current(0)
-    ttk.Label(column_window, text="Select the column that contains Price (optional):",style=("White.TLabel")).pack(pady=5)
+    ttk.Label(column_window, text="Select the column that contains Price (optional):",style=("WhiteBold.TLabel")).pack(pady=5)
     price_dropdown = ttk.Combobox(column_window, values=["<None>"] + column_names)
     price_dropdown.pack(pady=5)
     price_dropdown.current(0)
