@@ -180,7 +180,6 @@ def writer_worker(excel_queue, file_write_lock, results_file, column_names, prog
             break
         with file_write_lock:
             upc = row[UPC_INDEX] if len(row) > UPC_INDEX else "N/A"
-            logging.info(f"Row {upc} written to Excel.")
             ws.append(row)
             wb.save(results_file)
             with total_rows_lock:
