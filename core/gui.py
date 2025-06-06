@@ -5,13 +5,23 @@ import time
 import os
 import ctypes
 from queue import Empty
+import json
+import sys
 
 try:
     ctypes.windll.shcore.SetProcessDpiAwareness(1)  # DPI-aware
 except Exception:
     pass
 
-
+def get_version():
+    try:
+        base_dir = os.path.dirname(sys.executable) if getattr(sys, 'frozen', False) else os.getcwd()
+        version_file = os.path.join(base_dir, 'version.json')
+        with open(version_file, 'r') as f:
+            return json.load(f).get('version', 'Unknown')
+    except Exception:
+        return 'Unknown'
+    
 def choose_mode():
     mode = {'value': None}
     win = tk.Tk()
@@ -38,6 +48,29 @@ def choose_mode():
     def set_and_close(selection):
         mode['value'] = selection
         win.destroy()
+    
+    def show_info_window():
+        info_win = tk.Toplevel(win)
+        info_win.title("Program Info")
+        #info_win.geometry("400x250")
+        info_win.resizable(False, False)
+        info_win.attributes('-topmost', True)
+
+        info_frame = tk.Frame(info_win, bg='white', padx=20, pady=20)
+        info_frame.pack(expand=True, fill='both')
+        version = get_version()
+        label_text = (
+            "This program is designed to search for products on Walmart using UPC/EAN or Item ID. \n"
+            "To use the program, select the search mode, choose a file (Excel or CSV(UTF-8)) with the relevant data, and specify the columns containing the search key and price (optional).\n\n"
+            "After finishing the search, you can view a summary of the results, including the number of items processed, not found items, and total time taken.\n"
+            "Run /Walmart Parser/macro.xlsm script on results file to get the calculated results."
+        )
+        ttk.Label(info_frame, text="Walmart Parser", font=("Segoe UI", 14, "bold"), background="white").pack(pady=(0, 10))
+        ttk.Label(info_frame, text=f"Version: {version}", font=("Segoe UI", 11), background="white").pack()
+        tk.Label(info_frame, text=label_text, wraplength=380, justify="left", bg="white", font=("Segoe UI", 10)).pack(pady=(10))
+
+
+        ttk.Button(info_frame, text="Close", command=info_win.destroy).pack(pady=20)
 
     s = ttk.Style()
     s.theme_use('alt')
@@ -49,16 +82,32 @@ def choose_mode():
     s.map('Custom.TButton',
         background=[('active', "#0092E1")],  # при наведенні
         foreground=[('active', 'white')])
+        
+    s.configure('FlatInfo.TButton',
+        font=('Segoe UI', 10, 'bold'),
+        background='white',
+        foreground='#0066CC',
+        borderwidth=1,
+        relief='solid',
+        padding=(6, 4)
+    )
+
+    s.map('FlatInfo.TButton',
+        background=[('active', 'white')],
+        foreground=[('active', '#004C99')],
+        bordercolor=[('active', '#004C99')]
+    )
     
     btn_upc = ttk.Button(container, text="UPC/EAN", width = 20, style='Custom.TButton', command=lambda: set_and_close('upc'))
     btn_id = ttk.Button(container, text="Item ID", width = 20, style='Custom.TButton', command=lambda: set_and_close('id'))
-
+    btn_info = ttk.Button(container, text="ℹ Info", width=20, style='FlatInfo.TButton', command=show_info_window)
     # btn_upc = tk.Button(container, text="UPC/EAN", bg="#4CAF50", fg="white", font=('Cascadia Code', 10, 'bold'), command=lambda: set_and_close('upc'))
     # btn_id = tk.Button(container, text="ID", bg="#2196F3", fg="white", font=('Cascadia Code', 10, 'bold'), command=lambda: set_and_close('id'))
 
 
     btn_upc.pack(pady=5, ipady=3)
     btn_id.pack(pady=5, ipady=3)
+    btn_info.pack(pady=30)
 
     win.bind('<Return>', lambda e: set_and_close('upc'))
     win.bind('<Escape>', lambda e: win.destroy())
