@@ -26,9 +26,10 @@ def run_app():
         return
 
     start = time.time()
+    dt_str = time.strftime("%Y-%m-%d_%H-%M-%S", time.localtime(start))
     input_name = os.path.splitext(os.path.basename(selected_file))[0]
     input_folder = os.path.dirname(selected_file)
-    results_file = os.path.join(input_folder, f"{input_name}_parsed_{int(start)}.xlsx")
+    results_file = os.path.join(input_folder, f"{input_name}_parsed_{int(dt_str)}.xlsx")
     
     id_queue = Queue()
     excel_queue = Queue()
