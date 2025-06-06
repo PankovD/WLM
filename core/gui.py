@@ -51,7 +51,7 @@ def choose_mode():
         foreground=[('active', 'white')])
     
     btn_upc = ttk.Button(container, text="UPC/EAN", width = 20, style='Custom.TButton', command=lambda: set_and_close('upc'))
-    btn_id = ttk.Button(container, text="ID", width = 20, style='Custom.TButton', command=lambda: set_and_close('id'))
+    btn_id = ttk.Button(container, text="Item ID", width = 20, style='Custom.TButton', command=lambda: set_and_close('id'))
 
     # btn_upc = tk.Button(container, text="UPC/EAN", bg="#4CAF50", fg="white", font=('Cascadia Code', 10, 'bold'), command=lambda: set_and_close('upc'))
     # btn_id = tk.Button(container, text="ID", bg="#2196F3", fg="white", font=('Cascadia Code', 10, 'bold'), command=lambda: set_and_close('id'))
