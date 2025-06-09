@@ -63,7 +63,6 @@ def choose_mode():
             "This program is designed to search for products on Walmart using UPC/EAN or Item ID. \n"
             "To use the program, select the search mode, choose a file (Excel or CSV(UTF-8)) with the relevant data, and specify the columns containing the search key and price (optional).\n\n"
             "After finishing the search, you can view a summary of the results, including the number of items processed, not found items, and total time taken.\n"
-            "Run /Walmart Parser/macro.xlsm script on results file to get the calculated results."
         )
         ttk.Label(info_frame, text="Walmart Parser", font=("Segoe UI", 14, "bold"), background="white").pack(pady=(0, 10))
         ttk.Label(info_frame, text=f"Version: {version}", font=("Segoe UI", 11), background="white").pack()
