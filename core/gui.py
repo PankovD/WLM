@@ -24,6 +24,7 @@ def get_version():
     
 def choose_mode():
     mode = {'value': None}
+    info_win_ref = {'window': None}
     win = tk.Tk()
     win.title("Select Mode")
     win.resizable(False, False)
@@ -50,7 +51,12 @@ def choose_mode():
         win.destroy()
     
     def show_info_window():
+        if info_win_ref['window'] and info_win_ref['window'].winfo_exists():
+            info_win_ref['window'].lift()
+            info_win_ref['window'].focus_force()
+            return
         info_win = tk.Toplevel(win)
+        info_win_ref['window'] = info_win
         info_win.title("Program Info")
         #info_win.geometry("400x250")
         info_win.resizable(False, False)
@@ -63,14 +69,15 @@ def choose_mode():
             "This program is designed to search for products on Walmart using UPC/EAN or Item ID. \n"
             "To use the program, select the search mode, choose a file (Excel or CSV(UTF-8)) with the relevant data, and specify the columns containing the search key and price (optional).\n\n"
             "After finishing the search, you can view a summary of the results, including the number of items processed, not found items, and total time taken.\n"
-            "Run /Walmart Parser/macro.xlsm script on results file to get the calculated results."
         )
         ttk.Label(info_frame, text="Walmart Parser", font=("Segoe UI", 14, "bold"), background="white").pack(pady=(0, 10))
         ttk.Label(info_frame, text=f"Version: {version}", font=("Segoe UI", 11), background="white").pack()
         tk.Label(info_frame, text=label_text, wraplength=380, justify="left", bg="white", font=("Segoe UI", 10)).pack(pady=(10))
-
-
-        ttk.Button(info_frame, text="Close", command=info_win.destroy).pack(pady=20)
+        
+        def on_close():
+            info_win_ref['window'] = None  # очищаємо посилання
+            info_win.destroy()
+        ttk.Button(info_frame, text="Close", command=on_close).pack(pady=20)
 
     s = ttk.Style()
     s.theme_use('alt')

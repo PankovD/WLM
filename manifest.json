@@ -1,6 +1,6 @@
 {
   "version": "0.0.13",
-  "description": "Results file has correct datetime formet. Info window added.",
+  "description": "Results file has correct datetime format. Info window added.",
   "files": [
     {
       "path": "core/__init__.py",
@@ -33,10 +33,6 @@
     {
       "path": "core/main.py",
       "url": "https://raw.githubusercontent.com/PankovD/WLM/main/core/main.py"
-    },
-    {
-      "path": "macro.xlsm",
-      "url": "https://raw.githubusercontent.com/PankovD/WLM/main/macro.xlsm"
     }
   ]
 }
