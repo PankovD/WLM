@@ -33,10 +33,6 @@
     {
       "path": "core/main.py",
       "url": "https://raw.githubusercontent.com/PankovD/WLM/develop/core/main.py"
-    },
-    {
-      "path": "macro.xlsm",
-      "url": "https://raw.githubusercontent.com/PankovD/WLM/develop/macro.xlsm"
     }
   ]
 }
