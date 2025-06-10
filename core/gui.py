@@ -7,6 +7,7 @@ import ctypes
 from queue import Empty
 import json
 import sys
+import subprocess
 
 try:
     ctypes.windll.shcore.SetProcessDpiAwareness(1)  # DPI-aware
@@ -306,6 +307,25 @@ def show_summary(total_rows_written, time_str, results_file, blocks, not_found):
     msg4.pack()
     msg5.pack(pady=(0, 10))
 
+    def restart_program():
+        if getattr(sys, 'frozen', False):
+            # Якщо запущено як .exe
+            executable = os.path.abspath(sys.executable)
+            args = [executable] + sys.argv[1:]
+        else:
+            # Якщо запущено як скрипт
+            executable = os.path.abspath(sys.executable)
+            script = os.path.abspath(sys.argv[0])
+            args = [executable, script] + sys.argv[1:]
+        
+        # Використовуємо список аргументів: кожен елемент передається окремо
+        subprocess.Popen(args, shell=False)
+        sys.exit()
+
+
+
+
+
     def close():
         win.quit()
         win.after(10, os._exit, 0)
@@ -319,7 +339,7 @@ def show_summary(total_rows_written, time_str, results_file, blocks, not_found):
     s.map('Custom.TButton',
         background=[('active', "#009723")],  # при наведенні
         foreground=[('active', 'white')])
-    ttk.Button(container, text="Finish", width = 20, style='Custom.TButton', command=close).pack(pady=(10, 0))
+    ttk.Button(container, text="Finish", width = 20, style='Custom.TButton', command=restart_program).pack(pady=(10, 0))
 
 
     win.bind('<Return>', lambda e: close())

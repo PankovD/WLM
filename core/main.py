@@ -6,7 +6,7 @@ import logging
 from queue import Queue
 from .gui import choose_mode, choose_file_and_columns, show_progress_bar, show_summary
 from .processing import collect_ids, load_ids_from_file, writer_worker, consumer_worker
-
+import sys
 from .config import OUTPUT_FOLDER
 
 status = {
@@ -71,6 +71,7 @@ def run_app():
         logging.info("Total blocks: %d", status['blocks'])
         logging.info("Total time taken: %s", time_str)
         logging.info("Results saved in: %s", results_file)
+        
 
         show_summary(
             total_rows_written=status['total_rows_written'],
