@@ -22,7 +22,7 @@ def run_app():
 
     selected_file, key_col, price_col, column_names, total_rows = \
         choose_file_and_columns(id_mode=(mode=='id'))
-    if not selected_file:
+    if not key_col:
         return
 
     start = time.time()
