@@ -31,7 +31,7 @@ def choose_mode():
     win.resizable(False, False)
     win.attributes('-topmost', True)
 
-    width, height = 500, 400
+    width, height = 500, 450
     win.update_idletasks()
     screen_width = win.winfo_screenwidth()
     screen_height = win.winfo_screenheight()
@@ -50,7 +50,11 @@ def choose_mode():
     def set_and_close(selection):
         mode['value'] = selection
         win.destroy()
-    
+
+    def app_exit():
+        win.quit()
+        win.after(10, os._exit, 0)
+
     def show_info_window():
         if info_win_ref['window'] and info_win_ref['window'].winfo_exists():
             info_win_ref['window'].lift()
@@ -105,17 +109,27 @@ def choose_mode():
         foreground=[('active', '#004C99')],
         bordercolor=[('active', '#004C99')]
     )
+
+    s.configure('Exit.TButton',
+                font=('Cascadia Code', 10, 'bold'),
+                background="#AD0000",
+                foreground='white',
+                padding=(7, 7))
+    s.map('Exit.TButton',
+        background=[('active', "#D40000")],  # при наведенні
+        foreground=[('active', 'white')])
     
     btn_upc = ttk.Button(container, text="UPC/EAN", width = 20, style='Custom.TButton', command=lambda: set_and_close('upc'))
     btn_id = ttk.Button(container, text="Item ID", width = 20, style='Custom.TButton', command=lambda: set_and_close('id'))
     btn_info = ttk.Button(container, text="ℹ Info", width=20, style='FlatInfo.TButton', command=show_info_window)
     # btn_upc = tk.Button(container, text="UPC/EAN", bg="#4CAF50", fg="white", font=('Cascadia Code', 10, 'bold'), command=lambda: set_and_close('upc'))
     # btn_id = tk.Button(container, text="ID", bg="#2196F3", fg="white", font=('Cascadia Code', 10, 'bold'), command=lambda: set_and_close('id'))
-
+    btn_exit = ttk.Button(container, text="Exit", width=20, style='Exit.TButton', command=app_exit)
 
     btn_upc.pack(pady=5, ipady=3)
     btn_id.pack(pady=5, ipady=3)
     btn_info.pack(pady=30)
+    btn_exit.pack(pady=(10, 0), ipady=3)
 
     win.bind('<Return>', lambda e: set_and_close('upc'))
     win.bind('<Escape>', lambda e: win.destroy())
@@ -299,13 +313,13 @@ def show_summary(total_rows_written, time_str, results_file, blocks, not_found):
     msg2 = ttk.Label(container, text=f"{total_rows_written} items processed.", style='White.TLabel')
     msg3 = ttk.Label(container, text=f"Not found: {not_found} items.", style='White.TLabel')
     msg4 = ttk.Label(container, text=f"Total time taken: {time_str}", style='White.TLabel')
-    msg5 = ttk.Label(container, text=f"Total blocks: {blocks}", style='White.TLabel')
+    # msg5 = ttk.Label(container, text=f"Total blocks: {blocks}", style='White.TLabel')
     
     msg1.pack(pady=(0, 10))
     msg2.pack()
     msg3.pack()
-    msg4.pack()
-    msg5.pack(pady=(0, 10))
+    msg4.pack(pady=(0, 10))
+    # msg5.pack(pady=(0, 10))
 
     def restart_program():
         if getattr(sys, 'frozen', False):
@@ -321,10 +335,6 @@ def show_summary(total_rows_written, time_str, results_file, blocks, not_found):
         # Використовуємо список аргументів: кожен елемент передається окремо
         subprocess.Popen(args, shell=False)
         sys.exit()
-
-
-
-
 
     def close():
         win.quit()
