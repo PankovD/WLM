@@ -1,0 +1,218 @@
+[
+  {
+    "header": "Store Page",
+    "expression": "product_url.replace('?redirect=false', '')"
+  },
+  {
+    "header": "Catalog Page",
+    "expression": "f\"https://seller.walmart.com/catalog/add-items?search={original.get('UPC','')}\""
+  },
+  {
+    "header": "Product Title",
+    "json_path": "product.name"
+  },
+  {
+    "header": "Product ID",
+    "json_path": "product.usItemId"
+  },
+  {
+    "header": "Selling Price",
+    "json_path": "product.priceInfo.currentPrice.price"
+  },
+  {
+    "header": "Abstract Product Id",
+    "json_path": "product.abstractProductId"
+  },
+  {
+    "header": "Additional Offer Count",
+    "json_path": "product.additionalOfferCount"
+  },
+    {
+    "header": "Active Sellers",
+    "json_path": "product.transactableOfferCount"
+  },
+  {
+    "header": "Average Rating",
+    "json_path": "product.averageRating"
+  },
+  {
+    "header": "Ratings",
+    "json_path": "product.numberOfReviews"
+  },
+  {
+    "header": "Brand",
+    "json_path": "product.brand"
+  },
+  {
+    "header": "Buy Now Eligible",
+    "json_path": "product.buyNowEligible"
+  },
+  {
+    "header": "Claim Rate",
+    "json_path": "product.claimRate"
+  },
+  {
+    "header": "Class Type",
+    "json_path": "product.classType"
+  },
+  {
+    "header": "Condition Type",
+    "json_path": "product.conditionType"
+  },
+  {
+    "header": "Delivery Date",
+    "json_path": "product.fulfillmentLabel[].deliveryDate"
+  },
+  {
+    "header": "Fulfillment Type",
+    "json_path": "product.fulfillmentLabel[].fulfillmentType"
+  },
+  {
+    "header": "Gender",
+    "json_path": "product.gender"
+  },
+  {
+    "header": "Ironbank Category",
+    "json_path": "product.ironbankCategory"
+  },
+  {
+    "header": "Manufacturer Product Id",
+    "json_path": "product.manufacturerProductId"
+  },
+  {
+    "header": "Model",
+    "json_path": "product.model"
+  },
+  {
+    "header": "Number Of Reviews",
+    "json_path": "product.numberOfReviews"
+  },
+  {
+    "header": "Order Min Limit",
+    "json_path": "product.orderMinLimit"
+  },
+  {
+    "header": "Free Returns",
+    "json_path": "product.returnPolicy.freeReturns"
+  },
+  {
+    "header": "Return Policy Text",
+    "json_path": "product.returnPolicy.returnPolicyText"
+  },
+  {
+    "header": "Returnable",
+    "json_path": "product.returnPolicy.returnable"
+  },
+  {
+    "header": "Sales Unit",
+    "json_path": "product.salesUnit"
+  },
+  {
+    "header": "Current Seller",
+    "json_path": "product.sellerName"
+  },
+  {
+    "header": "Seller Display Name",
+    "json_path": "product.sellerDisplayName"
+  },
+  {
+    "header": "Seller Average Rating",
+    "json_path": "product.sellerAverageRating"
+  },
+  {
+    "header": "Seller Review Count",
+    "json_path": "product.sellerReviewCount"
+  },
+  {
+    "header": "Seller Store Front Url",
+    "json_path": "product.sellerStoreFrontURL"
+  },
+  {
+    "header": "Ship Method",
+    "json_path": "product.shippingOption.shipMethod"
+  },
+  {
+    "header": "Shipping Restriction",
+    "json_path": "product.shippingRestriction"
+  },
+  {
+    "header": "Short Description",
+    "json_path": "product.shortDescription"
+  },
+  {
+    "header": "Age Group",
+    "json_path": "product.vision.ageGroup"
+  },
+  {
+    "header": "Wfs Enabled",
+    "json_path": "product.wfsEnabled"
+  },
+  {
+    "header": "Highlights Brand",
+    "json_path": "idml.productHighlights.Brand"
+  },
+  {
+    "header": "Size",
+    "json_path": "idml.productHighlights.Size"
+  },
+  {
+    "header": "Scent",
+    "json_path": "idml.productHighlights.Scent"
+  },
+  {
+    "header": "Scent Family",
+    "json_path": "idml.productHighlights.Scent family"
+  },
+  {
+    "header": "Form",
+    "json_path": "idml.productHighlights.Form"
+  },
+  {
+    "header": "Fragrance Concentration",
+    "json_path": "idml.productHighlights.Fragrance concentration"
+  },
+  {
+    "header": "Condition",
+    "json_path": "idml.productHighlights.Condition"
+  },
+  {
+    "header": "Occasion",
+    "json_path": "idml.productHighlights.Occasion"
+  },
+  {
+    "header": "Count",
+    "json_path": "idml.productHighlights.Count "
+  },
+  {
+    "header": "Applicator Type",
+    "json_path": "idml.productHighlights.Applicator type"
+  },
+  {
+    "header": "Skin Care Concern",
+    "json_path": "idml.indications.Skin Care Concern"
+  },
+  {
+    "header": "Ingredients",
+    "json_path": "idml.ingredients.ingredients.value"
+  },
+  {
+    "header": "Long Description",
+    "json_path": "idml.longDescription"
+  },
+  {
+    "header": "Short Description",
+    "json_path": "idml.shortDescription"
+  },
+  {
+    "header": "Dimensions",
+    "json_path": "idml.specifications.Assembled Product Dimensions (L x W x H)"
+  },
+  {
+    "header": "UPC",
+    "expression": "original.get('UPC', '')"
+  },
+  {
+    "header": "PRICE",
+    "expression": "original.get('Price', '')"
+  }
+]

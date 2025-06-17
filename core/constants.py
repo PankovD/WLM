@@ -1,9 +1,22 @@
-# Заголовок для Excel-файлу результатів
+import os, sys
+
+APP_NAME = "Walmart Parser"
+
+if getattr(sys, 'frozen', False):
+    base_dir = os.path.dirname(sys.executable)
+else:
+    base_dir = os.path.dirname(__file__)
+
+COLUMNS_FILE = os.path.join(base_dir,'config','columns.json')
+CONFIGURED_FILE = os.path.join(base_dir,'config','configured_columns.json')
+DEFAULT_FILE = os.path.join(base_dir,'config','default_columns.json')
+
 RESULT_HEADER = [
     'Store Page', 'Catalog Page', 'Product Title', 'Product ID',
     'Selling Price', 'Active Sellers', 'Ratings', 'Average Rating',
     'Current Seller', 'UPC', 'PRICE'
 ]
+
 
 # HTTP headers для парсингу сторінок
 BASE_HEADERS = [

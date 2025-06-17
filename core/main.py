@@ -4,7 +4,7 @@ import time
 import threading
 import logging
 from queue import Queue
-from .gui import choose_mode, choose_file_and_columns, show_progress_bar, show_summary
+from .gui import choose_mode, choose_file_and_columns, show_progress_bar, show_summary, restart_program
 from .processing import collect_ids, load_ids_from_file, writer_worker, consumer_worker
 import sys
 from .config import OUTPUT_FOLDER
@@ -16,14 +16,14 @@ status = {
 }
 
 def run_app():
-    mode = choose_mode()
+    mode = choose_mode(current_user=None)
     if not mode:
         return
 
     selected_file, key_col, price_col, column_names, total_rows = \
         choose_file_and_columns(id_mode=(mode=='id'))
-    if not key_col:
-        return
+    if not selected_file or not key_col:
+        restart_program()
 
     start = time.time()
     dt_str = time.strftime("%Y-%m-%d_%H-%M-%S", time.localtime(start))

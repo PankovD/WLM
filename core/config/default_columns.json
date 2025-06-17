@@ -1,0 +1,46 @@
+[
+  {
+    "header": "Store Page",
+    "expression": "product_url.replace('?redirect=false', '')"
+  },
+  {
+    "header": "Catalog Page",
+    "expression": "f\"https://seller.walmart.com/catalog/add-items?search={original.get('UPC','')}\""
+  },
+  {
+    "header": "Product Title",
+    "json_path": "product.name"
+  },
+  {
+    "header": "Product ID",
+    "json_path": "product.usItemId"
+  },
+  {
+    "header": "Selling Price",
+    "json_path": "product.priceInfo.currentPrice.price"
+  },
+  {
+    "header": "Active Sellers",
+    "json_path": "product.transactableOfferCount"
+  },
+  {
+    "header": "Ratings",
+    "json_path": "product.numberOfReviews"
+  },
+  {
+    "header": "Average Rating",
+    "json_path": "product.averageRating"
+  },
+  {
+    "header": "Current Seller",
+    "json_path": "product.sellerName"
+  },
+  {
+    "header": "UPC",
+    "expression": "original.get('UPC', '')"
+  },
+  {
+    "header": "PRICE",
+    "expression": "original.get('Price', '')"
+  }
+]

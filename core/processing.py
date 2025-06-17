@@ -11,11 +11,17 @@ from .constants import BASE_HEADERS
 from requests.exceptions import RequestException
 from queue import Queue
 from openpyxl import Workbook
-from .constants import RESULT_HEADER
+from .constants import CONFIGURED_FILE
 from .network import get_token, is_blocked, random_sleep, wait_for_connection
 from .config import OUTPUT_ID_CSV
 import csv
 import pandas as pd
+import sys
+
+def get_column_defs():
+    with open(CONFIGURED_FILE, 'r', encoding='utf-8') as f:
+        return json.load(f)
+    
 
 not_found = 0
 def collect_ids(id_queue, excel_queue, selected_file, upc_col, price_col, column_names, status=None):
@@ -25,7 +31,7 @@ def collect_ids(id_queue, excel_queue, selected_file, upc_col, price_col, column
 
     # Отримання OAuth токена
     token = get_token()
-
+    column_defs = get_column_defs()
     # Підготовка writer для результатів
     writer_file = open(OUTPUT_ID_CSV, 'w', newline='', encoding='utf-8')
     writer = csv.writer(writer_file)
@@ -119,9 +125,17 @@ def collect_ids(id_queue, excel_queue, selected_file, upc_col, price_col, column
             not_found += 1
             status['not_found'] += 1 if status else 0
             logging.warning(f"UPC {original_upc} not found after 3 retries")
-            notfound_row = [
-                '', '', '', 'Not Found', '', '', '', '', '', original_upc, price
-            ] + [original.get(col, '') for col in column_names]
+
+            headers = [col['header'] for col in column_defs] + column_names
+            notfound_row_data = {}
+            for col in column_defs:
+                if col['header'] == 'Product ID':
+                    notfound_row_data[col['header']] = 'Not Found'
+                else:
+                    notfound_row_data[col['header']] = ''
+            for col in column_names:
+                notfound_row_data[col] = original.get(col, '')
+            notfound_row = [notfound_row_data.get(h, '') for h in headers]
             excel_queue.put(notfound_row)
 
         writer_file.flush()
@@ -156,11 +170,12 @@ def load_ids_from_file(id_queue, selected_file, id_col, price_col, column_names)
     id_queue.put(None)
 
 # ------------------- Writer: Запис рядків у Excel -------------------
-result_header = [
-    'Store Page', 'Catalog Page', 'Product Title', 'Product ID',
-    'Selling Price', 'Active Sellers', 'Ratings', 'Average Rating',
-    'Current Seller', 'UPC', 'PRICE'
-]
+# result_header = [
+#     'Store Page', 'Catalog Page', 'Product Title', 'Product ID',
+#     'Selling Price', 'Active Sellers', 'Ratings', 'Average Rating',
+#     'Current Seller', 'UPC', 'PRICE'
+# ]
+
 wb = Workbook()
 ws = wb.active
 
@@ -170,8 +185,10 @@ total_rows_lock = threading.Lock()
 
 def writer_worker(excel_queue, file_write_lock, results_file, column_names, progress_queue=None, status=None):
     global total_rows_written
-    UPC_INDEX = RESULT_HEADER.index("UPC")
-    ws.append(RESULT_HEADER + column_names)
+    column_defs = get_column_defs()
+    headers = [col['header'] for col in column_defs] + column_names
+    UPC_INDEX = headers.index("UPC")
+    ws.append(headers)
     wb.save(results_file)
     while True:
         row = excel_queue.get()
@@ -195,11 +212,12 @@ def writer_worker(excel_queue, file_write_lock, results_file, column_names, prog
     
     if progress_queue:
         progress_queue.put(None)
-# ------------------- Consumer: Парсинг сторінок -------------------
+
+# ------------------- Original consumer -------------------
 def consumer_worker(id_queue, excel_queue, column_names, results_file, status=None):
     h_index = 0
     blocks = 0
-
+    column_defs = get_column_defs()
     with httpx.Client(http2=True, timeout=10) as client:
         while True:
             raw = id_queue.get()
@@ -264,24 +282,64 @@ def consumer_worker(id_queue, excel_queue, column_names, results_file, status=No
                 if not prod:
                     continue
 
-                # ↓ Зібрали всі потрібні поля, складаємо рядок і кидаємо його в excel_queue
-                price_info = prod.get('priceInfo') or {}
-                current = price_info.get('currentPrice') or {}
-                row_data = {
-                    'Store Page': product_url.replace("?redirect=false", ""),
-                    'Catalog Page': f"https://seller.walmart.com/catalog/add-items?search={original.get('UPC','')}",
-                    'Product Title': prod.get('name'),
-                    'Product ID': prod.get('usItemId'),
-                    'Selling Price': current.get('price'),
-                    'Active Sellers': prod.get('transactableOfferCount'),
-                    'Ratings': prod.get('numberOfReviews'),
-                    'Average Rating': prod.get('averageRating'),
-                    'Current Seller': prod.get('sellerName'),
-                    'UPC': original.get('UPC',''),
-                    'PRICE': original.get('Price',''),
-                    **{col: original.get(col,'') for col in column_names}
+                idml = (
+                    data_json.get("props", {})
+                              .get("pageProps", {})
+                              .get("initialData", {})
+                              .get("data", {})
+                              .get("idml", {})
+                )
+                if not idml:
+                    continue
+#----------------------NEW BLOCK--------------------
+                data_sources = {
+                    'product': prod,
+                    'idml': idml,
+                    'original': original,
+                    'product_url': product_url.replace("?redirect=false", ""),
+                    'current': prod.get('priceInfo', {}).get('currentPrice', {})
                 }
-                row = [row_data.get(h, '') for h in RESULT_HEADER + column_names]
+
+                def get_by_path(data_sources, path):
+                    try:
+                        parts = path.split('.')
+                        current = data_sources.get(parts[0])
+                        for part in parts[1:]:
+                            if isinstance(current, list):
+                                # Претендуємо, що це список словників зі схемою name/value
+                                name_map = {item.get("name"): item.get("value") for item in current if isinstance(item, dict)}
+                                current = name_map.get(part, "")
+                            elif isinstance(current, dict):
+                                current = current.get(part)
+                            else:
+                                return ''
+                        if isinstance(current, (list, dict)):
+                            return json.dumps(current, ensure_ascii=False)
+                        return current if current is not None else ''
+                    except Exception:
+                        return ''
+
+                row_data = {
+                    **{
+                        col['header']: (
+                            eval(col['expression'], {}, {
+                                'product_url': product_url,
+                                'original': original,
+                                'prod': prod,
+                                'idml': idml,
+                                'current': prod.get('priceInfo', {}).get('currentPrice', {})
+                            }) if 'expression' in col else get_by_path(data_sources, col['json_path'])
+                        )
+                        for col in column_defs
+                    },
+                    **{col: original.get(col, '') for col in column_names}
+                }
+
+                headers = [col['header'] for col in column_defs] + column_names
+                row = [
+                    json.dumps(value) if isinstance(value, (list, dict)) else value
+                    for value in [row_data.get(h, '') for h in headers]
+                ]
                 excel_queue.put(row)
 
                 success = True
@@ -298,5 +356,41 @@ def consumer_worker(id_queue, excel_queue, column_names, results_file, status=No
             # Якщо 3 спроби не дали результат (й ми не були заблоковані), фіксуємо помилку та закриваємо задачу
             logging.error(f"Failed to process item {product_id} after 3 attempts")
             id_queue.task_done()
+#----------------------END NEW BLOCK--------------------
+                # ↓ Зібрали всі потрібні поля, складаємо рядок і кидаємо його в excel_queue
+    #             price_info = prod.get('priceInfo') or {}
+    #             current = price_info.get('currentPrice') or {}
+    #             row_data = {
+    #                 'Store Page': product_url.replace("?redirect=false", ""),
+    #                 'Catalog Page': f"https://seller.walmart.com/catalog/add-items?search={original.get('UPC','')}",
+    #                 'Product Title': prod.get('name'),
+    #                 'Product ID': prod.get('usItemId'),
+    #                 'Selling Price': current.get('price'),
+    #                 'Active Sellers': prod.get('transactableOfferCount'),
+    #                 'Ratings': prod.get('numberOfReviews'),
+    #                 'Average Rating': prod.get('averageRating'),
+    #                 'Current Seller': prod.get('sellerName'),
+    #                 'UPC': original.get('UPC',''),
+    #                 'PRICE': original.get('Price',''),
+    #                 **{col: original.get(col,'') for col in column_names}
+    #             }
+    #             row = [row_data.get(h, '') for h in RESULT_HEADER + column_names]
+    #             excel_queue.put(row)
 
-    logging.info(f"Consumer finished; total blocks: {blocks}")
+    #             success = True
+    #             break  # вдалий парсинг, виходимо з attempts
+
+    #         if blocked:
+    #             # Якщо був блок, уже зробили task_done/put → просто продовжуємо
+    #             continue
+
+    #         if success:
+    #             id_queue.task_done()
+    #             continue
+
+    #         # Якщо 3 спроби не дали результат (й ми не були заблоковані), фіксуємо помилку та закриваємо задачу
+    #         logging.error(f"Failed to process item {product_id} after 3 attempts")
+    #         id_queue.task_done()
+
+    # logging.info(f"Consumer finished; total blocks: {blocks}")
+
