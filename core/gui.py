@@ -482,6 +482,7 @@ def choose_mode(current_user=None):
 
         set_frame = tk.Frame(set_win, bg='white', padx=20, pady=20)
         set_frame.pack(expand=True, fill='both')
+        tk.Frame(set_frame, height=30, bg='white').pack(pady=(5, 0))
         ttk.Button(set_frame, text="Configure Columns", style='Other.TButton', command=open_column_configurator).pack(pady=5, fill='x')
         tk.Frame(set_frame, height=30, bg='white').pack(pady=(5, 0))
         ttk.Button(set_frame, text="Change Password",  style='Other.TButton', command=change_password_dialog).pack(pady=5, fill='x')
