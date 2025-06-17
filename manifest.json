@@ -1,38 +1,54 @@
 {
-  "version": "0.1.1",
-  "description": "Login testing",
+  "version": "0.2.1",
+  "description": "Columns configuration added. Log Out and Delete Account configured.",
   "files": [
     {
       "path": "core/__init__.py",
-      "url": "https://raw.githubusercontent.com/PankovD/WLM/main/core/__init__.py"
+      "url": "https://raw.githubusercontent.com/PankovD/WLM/develop/core/__init__.py"
     },    
     {
       "path": "core/config.py",
-      "url": "https://raw.githubusercontent.com/PankovD/WLM/main/core/config.py"
+      "url": "https://raw.githubusercontent.com/PankovD/WLM/develop/core/config.py"
+    },
+    {
+      "path": "core/auth.py",
+      "url": "https://raw.githubusercontent.com/PankovD/WLM/develop/core/auth.py"
     },
     {
       "path": "core/constants.py",
-      "url": "https://raw.githubusercontent.com/PankovD/WLM/main/core/constants.py"
+      "url": "https://raw.githubusercontent.com/PankovD/WLM/develop/core/constants.py"
     },
     {
       "path": "core/gui.py",
-      "url": "https://raw.githubusercontent.com/PankovD/WLM/main/core/gui.py"
+      "url": "https://raw.githubusercontent.com/PankovD/WLM/develop/core/gui.py"
     },
     {
       "path": "core/io_utils.py",
-      "url": "https://raw.githubusercontent.com/PankovD/WLM/main/core/io_utils.py"
+      "url": "https://raw.githubusercontent.com/PankovD/WLM/develop/core/io_utils.py"
     },
     {
       "path": "core/network.py",
-      "url": "https://raw.githubusercontent.com/PankovD/WLM/main/core/network.py"
+      "url": "https://raw.githubusercontent.com/PankovD/WLM/develop/core/network.py"
     },
     {
       "path": "core/processing.py",
-      "url": "https://raw.githubusercontent.com/PankovD/WLM/main/core/processing.py"
+      "url": "https://raw.githubusercontent.com/PankovD/WLM/develop/core/processing.py"
     },
     {
       "path": "core/main.py",
-      "url": "https://raw.githubusercontent.com/PankovD/WLM/main/core/main.py"
-    }
+      "url": "https://raw.githubusercontent.com/PankovD/WLM/develop/core/main.py"
+    },
+    {
+      "path": "core/config/columns.json",
+      "url": "https://raw.githubusercontent.com/PankovD/WLM/develop/core/config/columns.json"
+    },
+    {
+      "path": "core/config/default_columns.json",
+      "url": "https://raw.githubusercontent.com/PankovD/WLM/develop/core/config/default_columns.json"
+    },
+    {
+      "path": "core/walmart.ico",
+      "url": "https://raw.githubusercontent.com/PankovD/WLM/develop/core/config/walmart.ico"
+    },
   ]
 }
