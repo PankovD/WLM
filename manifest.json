@@ -1,5 +1,5 @@
 {
-  "version": "0.1.1",
+  "version": "0.2.1",
   "description": "Columns configuration added. Log Out and Delete Account configured.",
   "files": [
     {
@@ -48,6 +48,10 @@
     },
     {
       "path": "core/walmart.ico",
+      "url": "https://raw.githubusercontent.com/PankovD/WLM/main/core/walmart.ico"
+    },
+    {
+      "path": "walmart.ico",
       "url": "https://raw.githubusercontent.com/PankovD/WLM/main/core/walmart.ico"
     }
   ]
