@@ -35,16 +35,18 @@ import ctypes
 
 #     return None
 if getattr(sys, 'frozen', False):
+    # Якщо .exe — беремо директорію з .exe (onedir launcher.exe)
     base_dir = os.path.dirname(sys.executable)
 else:
-    base_dir = os.path.dirname(__file__)
+    # Якщо .py — беремо каталог на рівень вище, ніж цей файл
+    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+
+CREDENTIALS_FILE = os.path.join(base_dir, 'core', 'credentials.json')
 
 SUPABASE_URL = "https://dvjqnzmttscktzbxujex.supabase.co"
 DELETE_ACCOUNT_ENDPOINT = f"{SUPABASE_URL}/rest/v1/rpc/delete_account"
 CHANGE_PW_ENDPOINT = f"{SUPABASE_URL}/rest/v1/rpc/change_password"
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "")
-
-CREDENTIALS_FILE = os.path.join(base_dir, 'credentials.json')
 
 def load_credentials():
     if os.path.exists(CREDENTIALS_FILE):
@@ -87,6 +89,7 @@ def change_password_rpc(username: str, old: str, new: str) -> tuple[bool, str]:
         "input_new_password": new
     }
     resp = requests.post(CHANGE_PW_ENDPOINT, json=payload, headers=headers)
+
     if resp.status_code == 200:
         data = resp.json()
         return data.get("status") == "changed", data.get("message", "")
