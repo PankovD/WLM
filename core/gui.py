@@ -19,9 +19,11 @@ try:
 except Exception:
     pass
 if getattr(sys, 'frozen', False):
+    # Якщо .exe — беремо директорію з .exe (onedir launcher.exe)
     base_dir = os.path.dirname(sys.executable)
 else:
-    base_dir = os.path.dirname(__file__)
+    # Якщо .py — беремо каталог на рівень вище, ніж цей файл
+    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
 
 class ColumnConfigWindow:
@@ -31,6 +33,7 @@ class ColumnConfigWindow:
         # дані
         self.available_columns = self._load_json(COLUMNS_FILE)
         if not os.path.exists(CONFIGURED_FILE):
+            print(CONFIGURED_FILE)
             self.selected_columns = self._load_json(DEFAULT_FILE)
         else:
             self.selected_columns  = self._load_json(CONFIGURED_FILE)
