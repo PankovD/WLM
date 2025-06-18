@@ -33,7 +33,6 @@ class ColumnConfigWindow:
         # дані
         self.available_columns = self._load_json(COLUMNS_FILE)
         if not os.path.exists(CONFIGURED_FILE):
-            print(CONFIGURED_FILE)
             self.selected_columns = self._load_json(DEFAULT_FILE)
         else:
             self.selected_columns  = self._load_json(CONFIGURED_FILE)
@@ -151,6 +150,8 @@ class ColumnConfigWindow:
 
     def _save(self):
         try:
+            if not os.path.exists(CONFIGURED_FILE):
+                os.makedirs(os.path.dirname(CONFIGURED_FILE), exist_ok=True)
             with open(CONFIGURED_FILE, 'w', encoding='utf-8') as f:
                 json.dump(self.selected_columns, f, indent=2, ensure_ascii=False)
             self.master.destroy()
