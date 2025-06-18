@@ -150,6 +150,8 @@ class ColumnConfigWindow:
 
     def _save(self):
         try:
+            if not os.path.exists(CONFIGURED_FILE):
+                os.makedirs(os.path.dirname(CONFIGURED_FILE), exist_ok=True)
             with open(CONFIGURED_FILE, 'w', encoding='utf-8') as f:
                 json.dump(self.selected_columns, f, indent=2, ensure_ascii=False)
             self.master.destroy()

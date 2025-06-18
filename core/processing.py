@@ -11,7 +11,7 @@ from .constants import BASE_HEADERS
 from requests.exceptions import RequestException
 from queue import Queue
 from openpyxl import Workbook
-from .constants import CONFIGURED_FILE
+from .constants import CONFIGURED_FILE, DEFAULT_FILE
 from .network import get_token, is_blocked, random_sleep, wait_for_connection
 from .config import OUTPUT_ID_CSV
 import csv
@@ -19,8 +19,14 @@ import pandas as pd
 import sys
 
 def get_column_defs():
-    with open(CONFIGURED_FILE, 'r', encoding='utf-8') as f:
-        return json.load(f)
+    if not os.path.exists(CONFIGURED_FILE):
+        with open(DEFAULT_FILE, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    else:
+        with open(CONFIGURED_FILE, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    
+
     
 
 not_found = 0
