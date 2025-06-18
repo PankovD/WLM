@@ -33,7 +33,6 @@ class ColumnConfigWindow:
         # дані
         self.available_columns = self._load_json(COLUMNS_FILE)
         if not os.path.exists(CONFIGURED_FILE):
-            print(CONFIGURED_FILE)
             self.selected_columns = self._load_json(DEFAULT_FILE)
         else:
             self.selected_columns  = self._load_json(CONFIGURED_FILE)
