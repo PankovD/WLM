@@ -82,10 +82,10 @@ def run_app():
         )
 
 
-    t_progress = threading.Thread(target=show_progress_bar,
-                                  args=(total_rows, progress_queue, finish_cb))
-    t_progress.start()
-
+    # t_progress = threading.Thread(target=show_progress_bar,
+    #                               args=(total_rows, progress_queue, finish_cb))
+    # t_progress.start()
+    show_progress_bar(total_rows, progress_queue, finish_cb)
     # Очікування завершення
     if mode == 'upc':
         t_prod.join()
