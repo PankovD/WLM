@@ -641,7 +641,7 @@ def choose_file_and_columns(id_mode=False):
     id_dropdown = ttk.Combobox(column_window, values=column_names)
     id_dropdown.pack(pady=5)
     id_dropdown.current(0)
-    ttk.Label(column_window, text="Select the column that contains Price (optional):",style=("White.TLabel")).pack(pady=5)
+    ttk.Label(column_window, text="Select the column that contains Price:",style=("White.TLabel")).pack(pady=5)
     price_dropdown = ttk.Combobox(column_window, values=["<None>"] + column_names)
     price_dropdown.pack(pady=5)
     price_dropdown.current(0)
