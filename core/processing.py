@@ -362,6 +362,7 @@ def consumer_worker(id_queue, excel_queue, column_names, results_file, status=No
             # Якщо 3 спроби не дали результат (й ми не були заблоковані), фіксуємо помилку та закриваємо задачу
             logging.error(f"Failed to process item {product_id} after 3 attempts")
             id_queue.task_done()
+            id_queue.put((product_id, original)) # повертаємо в чергу для повторної обробки
 #----------------------END NEW BLOCK--------------------
                 # ↓ Зібрали всі потрібні поля, складаємо рядок і кидаємо його в excel_queue
     #             price_info = prod.get('priceInfo') or {}
