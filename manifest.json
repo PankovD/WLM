@@ -1,6 +1,6 @@
 {
-  "version": "0.2.1",
-  "description": "Columns configuration added. Log Out and Delete Account configured.",
+  "version": "0.2.5",
+  "description": "Configured for smaller installer file and smaller final program size.",
   "files": [
     {
       "path": "core/__init__.py",
