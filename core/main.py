@@ -51,7 +51,7 @@ def run_app():
 
     # Consumers
     consumers = []
-    for _ in range(15): # Number of consumer threads
+    for _ in range(3):
         t = threading.Thread(target=consumer_worker,
                               args=(id_queue, excel_queue, column_names, results_file, status))
         t.start()
@@ -82,10 +82,10 @@ def run_app():
         )
 
 
-    # t_progress = threading.Thread(target=show_progress_bar,
-    #                               args=(total_rows, progress_queue, finish_cb))
-    # t_progress.start()
-    show_progress_bar(total_rows, progress_queue, finish_cb)
+    t_progress = threading.Thread(target=show_progress_bar,
+                                  args=(total_rows, progress_queue, finish_cb))
+    t_progress.start()
+
     # Очікування завершення
     if mode == 'upc':
         t_prod.join()
