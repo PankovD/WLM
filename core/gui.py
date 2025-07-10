@@ -851,15 +851,12 @@ def show_summary(total_rows_written, time_str, results_file, blocks, not_found):
             font=('Cascadia Code', 10, 'bold'),
             background="#0068EF",
             foreground='white',
-            relief='flat',
-            padding=(8, 5)
+            padding=(10, 10)
         )
     s.map(
             'Open.TButton',
             background=[('active', "#2483FF")],  # при наведенні
-            foreground=[('active', 'white')],
-            relief=[('active', 'flat')]
-        )
+            foreground=[('active', 'white')])
     
     ttk.Button(container, text="Finish", width = 20, style='Custom.TButton', command=on_restart).pack(pady=(10, 0))
     ttk.Button(container, text="Open results", width = 20, style='Open.TButton', command=open_file).pack(pady=(10, 0))
