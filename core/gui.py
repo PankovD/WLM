@@ -778,7 +778,7 @@ def show_summary(total_rows_written, time_str, results_file, blocks, not_found):
     win.resizable(False, False)
     win.attributes('-topmost', True)
 
-    width, height = 400, 300
+    width, height = 400, 350
     win.update_idletasks()
     screen_width = win.winfo_screenwidth()
     screen_height = win.winfo_screenheight()
