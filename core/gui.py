@@ -215,7 +215,9 @@ def choose_mode(current_user=None):
     win = tk.Tk()
     win.title("Walmart Parser")
     win.resizable(False, False)
-    win.lift()
+    win.lift()                
+    win.attributes('-topmost', True)   
+    win.after(100, lambda: win.attributes('-topmost', False)) 
     
     if not current_user:
         user_from_file = load_credentials()
