@@ -211,11 +211,12 @@ def choose_mode(current_user=None):
     set_win_ref = {'window': None}
     pw_win_ref = {'window': None}
     columns_config_ref = {'window': None}
-
+    
     win = tk.Tk()
     win.title("Walmart Parser")
     win.resizable(False, False)
-    win.attributes('-topmost', True)
+    win.lift()
+    
     if not current_user:
         user_from_file = load_credentials()
         current_user = user_from_file
@@ -349,7 +350,7 @@ def choose_mode(current_user=None):
         info_win.title("Program Info")
         #info_win.geometry("400x250")
         info_win.resizable(False, False)
-        info_win.attributes('-topmost', True)
+        
 
         info_frame = tk.Frame(info_win, bg='white', padx=20, pady=20)
         info_frame.pack(expand=True, fill='both')
@@ -412,7 +413,7 @@ def choose_mode(current_user=None):
         columns_config_ref['window'] = col_win
         col_win.title("Configure Columns")
         col_win.geometry("800x700")
-        col_win.attributes('-topmost', True)
+        
         # col_win.grab_set()  # але блокує інші вікна поки відкрито це
         s = ttk.Style(col_win)
         s.theme_use('alt')
@@ -612,7 +613,7 @@ def choose_file_and_columns(id_mode=False):
     column_window = tk.Tk()
     column_window.title("Select Columns")
     column_window.resizable(False, False)
-    column_window.attributes('-topmost', True)
+    
     column_window.configure(bg='white')
     width, height = 500, 250
     column_window.update_idletasks()
@@ -679,7 +680,7 @@ def show_progress_bar(total_count, progress_queue, finish_callback):
     root.title("Processing Progress")
     root.geometry("400x230")
     root.resizable(False, False)
-    root.attributes('-topmost', True)
+    
 
     s = ttk.Style(root)
     s.theme_use('clam')
@@ -820,6 +821,17 @@ def show_summary(total_rows_written, time_str, results_file, blocks, not_found):
     def on_restart():
         win.destroy()
         restart_program()
+    
+    def open_file():
+        if not os.path.exists(results_file):
+            messagebox.showerror("Error", "Results file not found.")
+            return
+        try:
+            os.startfile(results_file)
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to open results file: {e}")
+        win.destroy()
+        restart_program()
 
     s = ttk.Style(win)
     s.theme_use('clam')
@@ -831,7 +843,24 @@ def show_summary(total_rows_written, time_str, results_file, blocks, not_found):
     s.map('Custom.TButton',
         background=[('active', "#009723")],  # при наведенні
         foreground=[('active', 'white')])
+    
+    s.configure(
+            'Open.TButton',
+            font=('Cascadia Code', 10, 'bold'),
+            background="#0068EF",
+            foreground='white',
+            relief='flat',
+            padding=(8, 5)
+        )
+    s.map(
+            'Open.TButton',
+            background=[('active', "#2483FF")],  # при наведенні
+            foreground=[('active', 'white')],
+            relief=[('active', 'flat')]
+        )
+    
     ttk.Button(container, text="Finish", width = 20, style='Custom.TButton', command=on_restart).pack(pady=(10, 0))
+    ttk.Button(container, text="Open results", width = 20, style='Open.TButton', command=open_file).pack(pady=(10, 0))
 
 
     win.bind('<Return>', lambda e: close())
