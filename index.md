@@ -1,5 +1,11 @@
 ---
 layout: default
+title: Walmart Parser
+description: Simple and effective Walmart scraper
+theme: jekyll-theme-cayman
+show_downloads: false
+github:
+  is_project_page: false
 ---
 
 # Walmart Parser
