@@ -14,18 +14,23 @@
     <p>Version 0.2.1</p>
   </header>
 
-  <details>
-    <summary>Features</summary>
+
+
+<details class="accordion">
+  <summary>Features</summary>
+  <div class="content">
     <ul>
       <li>Search for products by UPC/EAN</li>
       <li>Saving results data to Excel</li>
       <li>Multithreading</li>
       <li>Easy to use interface</li>
     </ul>
-  </details>
+  </div>
+</details>
 
-  <details>
-    <summary>How to use</summary>
+<details class="accordion">
+  <summary>How to use</summary>
+  <div class="content">
     <ol>
       <li>Launch the application</li>
       <li>Select search mode</li>
@@ -33,25 +38,58 @@
       <li>Press "Start"</li>
       <li>Open results in Excel</li>
     </ol>
-  </details>
+  </div>
+</details>
 
-  <details>
-    <summary>Screenshots</summary>
+<details class="accordion">
+  <summary>Screenshots</summary>
+  <div class="content">
     <img src="assets/screen1.PNG" alt="Screenshot 1" width="500">
     <img src="assets/screen2.PNG" alt="Screenshot 2" width="500">
-  </details>
+  </div>
+</details>
 
-  <details>
-    <summary>FAQ</summary>
+<details class="accordion">
+  <summary>FAQ</summary>
+  <div class="content">
     <p><strong>Q: </strong><span class="Q">What input data is needed?</span><br>
        <strong>A: </strong>Just a list of product IDs or UPCs with prices.</p>
-
     <p><strong>Q: </strong><span class="Q">What results will I get?</span><br>
        <strong>A: </strong>Excel file with customizable columns.</p>
-
     <p><strong>Q: </strong><span class="Q">How fast is the parsing?</span><br>
        <strong>A: </strong>Around 100 products in 5 minutes.</p>
-  </details>
+  </div>
+</details>
+
+<script>
+  
+document.querySelectorAll("details.accordion").forEach((el) => {
+  const content = el.querySelector(".content");
+
+  el.addEventListener("toggle", () => {
+    if (el.open) {
+      // Скидаємо попереднє значення, щоб перезапустити transition
+      content.style.transition = "none";
+      content.style.maxHeight = "0";
+
+      // Примусове перерахування стилів (reflow)
+      content.offsetHeight; // просто звернення до властивості
+
+      // Знову вмикаємо transition і задаємо нову висоту
+      content.style.transition = "max-height 0.4s ease";
+      content.style.maxHeight = content.scrollHeight + "px";
+    } else {
+      content.style.maxHeight = "0";
+    }
+  });
+
+  // Початковий стан при завантаженні
+  if (el.open) {
+    content.style.maxHeight = content.scrollHeight + "px";
+  }
+});
+
+</script>
 
   <footer>
     <a href="" target="_blank"></a>
