@@ -16,7 +16,8 @@ github:
 }
 </style>
 
-Parsing Walmart products using API
+Parsing Walmart products using API.
+<br></br>
 Works with UPC/EAN or Product ID. Saves results to Excel.
 
 ## 🔧 Features:
