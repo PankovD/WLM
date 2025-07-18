@@ -4,27 +4,32 @@ layout: default
 
 # Walmart Parser
 
-Парсер товарів із Walmart API  
-Працює з UPC / Product ID / Search, зберігає в Excel.
+Parsing Walmart products using API
+Works with UPC/EAN or Product ID. Saves results to Excel.
 
-## 🔧 Можливості:
-- Пошук товарів за ID
-- Збереження результатів у Excel
-- Мультипотоковість
-- Простий інтерфейс
+## 🔧 Features:
+- Search for products by UPC/EAN
+- Saving results data to Excel
+- Multithreading
+- Easy to use interface
 
-## 🧑‍💻 Як користуватись:
-1. Запусти програму
-2. Обери .csv або Excel-файл з ID або UPC товарів
-3. Натисни "Start"
-4. Отримай Excel з результатами
+## 🧑‍💻 Hot to use:
+1. Launch the application
+2. Select search mode
+4. Select .csv or Excel-file with Product ID or UPC/EAN
+5. Press "Start"
+6. Open results in Excel
 
-## 🖼 Скріни
-(тут можна вставити картинки, коли буде .exe)
+## 🖼 Screenshots
 
-## ❓ Питання
-**Q:** Працює без інтернету?  
-**A:** Ні, потрібен доступ до Walmart API.
 
-**Q:** Які потрібні дані?  
-**A:** Просто список ID або UPC.
+## ❓ FAQ
+
+**Q:** What input data is needed?  
+**A:** Just a list of product IDs or UPCs with prices.
+
+**Q:** What results will I get?
+**A:** You will receive an Excel file with columns that you can customize via Settings → Configure Columns.
+
+**Q:** How fast is the parsing?  
+**A:** Around 100 products in 5 minutes. The parsing speed is limited by Walmart API throughput and possible rate limiting or blocks from the site.
