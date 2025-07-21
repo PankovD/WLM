@@ -14,8 +14,6 @@
     <p>Version 0.2.1</p>
   </header>
 
-
-
 <details class="accordion">
   <summary>Features</summary>
   <div class="content">
@@ -44,8 +42,8 @@
 <details class="accordion">
   <summary>Screenshots</summary>
   <div class="content">
-    <img src="assets/screen1.PNG" alt="Screenshot 1" width="500">
-    <img src="assets/screen2.PNG" alt="Screenshot 2" width="500">
+    <img src="assets/screen1.PNG" alt="Screenshot 1">
+    <img src="assets/screen2.PNG" alt="Screenshot 2">
   </div>
 </details>
 
@@ -62,33 +60,55 @@
 </details>
 
 <script>
-  
-document.querySelectorAll("details.accordion").forEach((el) => {
-  const content = el.querySelector(".content");
+  function setUniformImageHeights(images, maxCap = 500) {
+    let maxHeight = 0;
+    images.forEach(img => {
+      if (img.naturalHeight > maxHeight) {
+        maxHeight = img.naturalHeight;
+      }
+    });
+    maxHeight = Math.min(maxHeight, maxCap);
 
-  el.addEventListener("toggle", () => {
-    if (el.open) {
-      // Скидаємо попереднє значення, щоб перезапустити transition
-      content.style.transition = "none";
-      content.style.maxHeight = "0";
+    images.forEach(img => {
+      img.style.height = maxHeight + "px";
+      img.style.width = "auto";
+    });
+  }
 
-      // Примусове перерахування стилів (reflow)
-      content.offsetHeight; // просто звернення до властивості
-
-      // Знову вмикаємо transition і задаємо нову висоту
-      content.style.transition = "max-height 0.4s ease";
-      content.style.maxHeight = content.scrollHeight + "px";
-    } else {
-      content.style.maxHeight = "0";
-    }
-  });
-
-  // Початковий стан при завантаженні
-  if (el.open) {
+  function expandContent(content) {
+    content.style.transition = "none";
+    content.style.maxHeight = "0";
+    content.offsetHeight;
+    content.style.transition = "max-height 0.4s ease";
     content.style.maxHeight = content.scrollHeight + "px";
   }
-});
 
+  window.addEventListener("load", () => {
+    const detailsList = document.querySelectorAll("details.accordion");
+    const allImages = document.querySelectorAll("img");
+
+    // Після повного завантаження зображень — вирівнюємо висоти
+    setUniformImageHeights(allImages);
+
+    detailsList.forEach((el) => {
+      const content = el.querySelector(".content");
+
+      // Якщо відкрито під час завантаження — оновити maxHeight
+      if (el.open) {
+        expandContent(content);
+      }
+
+      el.addEventListener("toggle", () => {
+        if (el.open) {
+          // Після відкриття ще раз вирівняти висоти (на випадок, якщо запізнились)
+          setUniformImageHeights(content.querySelectorAll("img"));
+          expandContent(content);
+        } else {
+          content.style.maxHeight = "0";
+        }
+      });
+    });
+  });
 </script>
 
   <footer>
