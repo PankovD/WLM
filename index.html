@@ -6,6 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css" >
   <link rel="icon" href="assets/walmart.ico" type="image/x-icon">
+  <!-- <link href='https://fonts.googleapis.com/css?family=Sansation' rel='stylesheet'> -->
+  <link href="https://cdn.jsdelivr.net/npm/lightbox2@2.11.4/dist/css/lightbox.min.css" rel="stylesheet" />
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
   <header>
@@ -42,8 +45,13 @@
 <details class="accordion">
   <summary>Screenshots</summary>
   <div class="content">
-    <img src="assets/screen1.PNG" alt="Screenshot 1">
-    <img src="assets/screen2.PNG" alt="Screenshot 2">
+<a href="assets/screen1.PNG" data-lightbox="gallery" data-title="Підпис або опис зображення">
+  <img src="assets/screen1.PNG" alt="Зображення 1">
+</a>
+
+<a href="assets/screen2.PNG" data-lightbox="gallery" data-title="Ще одне зображення">
+  <img src="assets/screen2.PNG" alt="Зображення 2">
+</a>
   </div>
 </details>
 
@@ -79,7 +87,7 @@
     content.style.transition = "none";
     content.style.maxHeight = "0";
     content.offsetHeight;
-    content.style.transition = "max-height 0.4s ease";
+    content.style.transition = "max-height 0.5s ease";
     content.style.maxHeight = content.scrollHeight + "px";
   }
 
@@ -114,5 +122,6 @@
   <footer>
     <a href="" target="_blank"></a>
   </footer>
+  <script src="https://cdn.jsdelivr.net/npm/lightbox2@2.11.4/dist/js/lightbox.min.js"></script>
 </body>
 </html>
