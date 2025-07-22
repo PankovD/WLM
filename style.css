@@ -3,7 +3,7 @@ html {
 }
 
 body {
-  font-family: 'Segoe UI', Roboto, sans-serif;
+  font-family: Sansation, Roboto, sans-serif;
   margin: 0;
   padding: 2rem;
   background: linear-gradient(to right, #1f2d3a, #297a29); /* Темний синій -> зелений */
