@@ -3,28 +3,77 @@ html {
 }
 
 body {
-  font-family: Sansation, Roboto, sans-serif;
+  font-family: Nunito Sans;
   margin: 0;
-  padding: 2rem;
-  background: linear-gradient(to right, #1f2d3a, #297a29); /* Темний синій -> зелений */
-  color: #e8f1f8;
+  /* padding: 2rem; */
+  /* background: linear-gradient(to right, #1f2d3a, #297a29); */
+  color: #000000;
 }
 
-header {
+/* header {
   text-align: center;
   background: linear-gradient(to right, #223642, #34b653);
   margin-bottom: 2rem;
   padding: 1.5rem;
   border-radius: 14px;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
+} */
+.polygon {
+  display: flex;
+  align-items: center;       /* вертикальне вирівнювання */
+  justify-content: space-between;
+  padding: 4rem 2rem;
+  margin-bottom: 0rem;
+  background-color: #19e083;
+  clip-path: polygon(0 0, 100% 0, 100% 90%, 0 100%); /* нахилений низ */
+  color: #000;
+}
+.landing-text {
+  flex: 1;
+  padding-right: 2rem;
+}
+.landing-text h1 {
+  font-size: 3rem;
+  font-weight: bold;
+  line-height: 1.2;
+  margin-bottom: 1rem;
+}
+.landing-text p {
+  font-size: 1.2rem;
+  margin-bottom: 1.5rem;
+}
+.landing-text ul {
+  padding-left: 1.2rem;
+  font-size: 1.1rem;
 }
 
-h1 {
+.landing-img{
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.landing-image img {
+  max-width: 100%;
+  max-height: 400px;
+  border-radius: 12px;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.25);
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 1rem;
+  background: #ffffff;
+  color:#000000;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+/* h1 {
   color: #ffffff;
   margin: 0;
   font-size: 2.5rem;
   letter-spacing: 1px;
-}
+} */
 
 /* DETAILS BLOCK */
 details {
@@ -40,9 +89,10 @@ details {
 /* SUMMARY (clickable) */
 details summary {
   cursor: pointer;
+  padding: 2rem;
   font-size: 1.25rem;
   font-weight: 600;
-  color: #d3f7ff;
+  color: #000000;
   padding: 1rem 1.2rem;
   background: rgba(255, 255, 255, 0.06);
   user-select: none;
@@ -54,6 +104,7 @@ details summary {
 details summary:hover {
   background: rgba(255, 255, 255, 0.1);
   color: #a0f0ff;
+  
 }
 
 /* CONTENT inside details */
@@ -70,11 +121,11 @@ details > *:not(summary) {
 }
 
 /* LISTS AND TEXT */
-p {
+/* p {
   line-height: 1.7;
   margin-bottom: 1rem;
   color: #f0faff;
-}
+} */
 
 ul, ol {
   padding-left: 1.5rem;
@@ -87,19 +138,11 @@ li {
 .Q {
   font-weight: bold;
   font-style: italic;
-  color: #c8fbd6;
+  color: #00aa2d;
 }
 
 /* IMAGE STYLING */
-img {
-  width: auto;
-  max-height: 100px;
-  border: 1px solid #b5efff;
-  border-radius: 10px;
-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.3);
-  object-fit: contain;
-  margin: 1rem 0;
-}
+
 a[data-lightbox] img {
   max-height: 100px;
   border: 2px solid #e4f5ff;
@@ -115,24 +158,22 @@ a[data-lightbox] img:hover {
 }
 
 /* FOOTER */
+
+
 footer {
+  position: relative;
   text-align: center;
-  margin-top: 2rem;
-  font-size: 0.95rem;
-  color: #b0cdd9;
-}
+  padding: 3rem 1rem 1rem;
+  font-size: 1rem;
+  color: #000000;
+  background-color: #19E083;
+  clip-path: polygon(0 50%, 100% 0, 100% 100%, 0 100%); /* нахилений низ */
+  }
 
-footer a {
-  color: #7edbff;
-  text-decoration: none;
-  font-weight: bold;
-  transition: color 0.3s ease;
-}
+footer p {
+  color: #000000;
 
-footer a:hover {
-  color: #ffffff;
 }
-
 
 /* RESPONSIVE STYLES
 @media (max-width: 768px) {
