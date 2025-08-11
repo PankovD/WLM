@@ -5,8 +5,7 @@ html {
 body {
   font-family: Nunito Sans;
   margin: 0;
-  /* padding: 2rem; */
-  /* background: linear-gradient(to right, #1f2d3a, #297a29); */
+  padding: 0;
   color: #000000;
 }
 
