@@ -49,13 +49,17 @@ def run_app():
     else:
         load_ids_from_file(id_queue, selected_file, key_col, price_col, column_names)
 
+
+#----------------------------------------------------CHANGES----------------------------------------------------------
     # Consumers
     consumers = []
     for _ in range(3):
         t = threading.Thread(target=consumer_worker,
-                              args=(id_queue, excel_queue, column_names, results_file, status))
+                              args=(id_queue, excel_queue, column_names, results_file, progress_queue, status)) #progress_queue added
         t.start()
         consumers.append(t)
+#----------------------------------------------------CHANGES----------------------------------------------------------
+
 
     # Progress Bar
     def finish_cb():
