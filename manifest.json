@@ -1,6 +1,6 @@
 {
-  "version": "0.2.2",
-  "description": "queue fix",
+  "version": "0.2.3",
+  "description": "saving failed ids",
   "files": [
     {
       "path": "core/__init__.py",
@@ -56,4 +56,5 @@
     }
   ]
 }
+
 
