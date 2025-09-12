@@ -362,6 +362,21 @@ def consumer_worker(id_queue, excel_queue, column_names, results_file, progress_
             # Якщо 3 спроби не дали результат (й ми не були заблоковані), фіксуємо помилку та закриваємо задачу
             logging.error(f"Failed to process item {product_id} after 3 attempts")
             progress_queue.put(1)
+
+#----------------------FAILED WRITER BLOCK--------------------
+            try:
+                wb_f = Workbook()
+                failed_file = os.path.splitext(results_file)[0] + '_failed.xlsx'
+                ws_f = wb_f.active
+
+                row_to_write = [product_id] + [original.get(col, '') for col in column_names]
+                ws_f.append(row_to_write)
+
+                wb_f.save(failed_file)
+            except Exception as e:
+                logging.error(f"Failed to write to failed file: {e}")
+#----------------------END FAILED WRITER BLOCK--------------------
+
             id_queue.task_done()
 #----------------------END NEW BLOCK--------------------
                 # ↓ Зібрали всі потрібні поля, складаємо рядок і кидаємо його в excel_queue
