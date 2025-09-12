@@ -1,6 +1,6 @@
 {
-  "version": "0.2.3",
-  "description": "saving failed ids",
+  "version": "0.2.4",
+  "description": "saving failed blocked ids",
   "files": [
     {
       "path": "core/__init__.py",
@@ -56,5 +56,6 @@
     }
   ]
 }
+
 
 
