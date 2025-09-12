@@ -18,6 +18,9 @@ import csv
 import pandas as pd
 import sys
 
+MAX_BLOCK_RETRIES = 3
+
+
 def get_column_defs():
     if not os.path.exists(CONFIGURED_FILE):
         with open(DEFAULT_FILE, 'r', encoding='utf-8') as f:
@@ -249,16 +252,59 @@ def consumer_worker(id_queue, excel_queue, column_names, results_file, progress_
                     continue  # йдемо до наступної спроби із поточним product_url
 
                 # Якщо побачили блокування — повертаємо в чергу і виходимо
+#----------------------original is_blocked()--------------------
+                # if is_blocked(r):
+                #     blocks += 1
+                #     logging.warning(
+                #         f"Blocked for UPC {original.get('UPC','')}, re-enqueueing once"
+                #     )
+                #     id_queue.put((product_id, original))
+                #     id_queue.task_done()
+                #     time.sleep(180)
+                #     blocked = True
+                #     break   
+#----------------------NEW is_blocked()--------------------
                 if is_blocked(r):
                     blocks += 1
-                    logging.warning(
-                        f"Blocked for UPC {original.get('UPC','')}, re-enqueueing once"
-                    )
-                    id_queue.task_done()
-                    id_queue.put((product_id, original))
-                    time.sleep(180)
+                    logging.warning(f"Blocked for UPC {original.get('UPC','')}, re-enqueueing once")
+
+                    # безпечно інкрементимо лічильник спроб (робимо shallow copy щоб не впливати на інші посилання)
+                    retries = original.get('_blocked_retries', 0) + 1
+                    new_original = dict(original)  # або original.copy()
+                    new_original['_blocked_retries'] = retries
+
+                    if retries > MAX_BLOCK_RETRIES:
+                        logging.error(f"Item {product_id} blocked {retries} times — moving to failed")
+                        # записати у failed тут (вставити свій код запису в failed файл / excel_queue)
+                        # приклад: excel_queue_failed.put([product_id, *[new_original.get(col,'') for col in column_names]])
+                        logging.error(f"Failed to process item {product_id} after 3 attempts")
+                        progress_queue.put(1)
+
+            #----------------------FAILED WRITER BLOCK--------------------
+                        try:
+                            wb_f = Workbook()
+                            failed_file = os.path.splitext(results_file)[0] + '_failed.xlsx'
+                            ws_f = wb_f.active
+
+                            row_to_write = [product_id] + [original.get(col, '') for col in column_names]
+                            ws_f.append(row_to_write)
+
+                            wb_f.save(failed_file)
+                        except Exception as e:
+                            logging.error(f"Failed to write to failed file: {e}")
+                        id_queue.task_done()
+                        # не re-enqueue — вважаємо цю задачу "завершеною", бо ми її відправили в failed
+                    else:
+                        # 1) спочатку повертаємо айтем у чергу
+                        id_queue.put((product_id, new_original))
+                        # 2) лише потім позначаємо цю get() як завершену
+                        id_queue.task_done()
+                        # 3) пауза перед наступними спробами щоб "охолонути"
+                        time.sleep(180)
+
                     blocked = True
                     break
+#----------------------END NEW is_blocked()--------------------
 
                 # Якщо статус 301/302/… — поновлюємо product_url на поточну Location та пробуємо ще раз
                 if r.status_code in (301, 302, 303, 307, 308):
