@@ -10,7 +10,7 @@ HEADERS_BASE = {
     "Accept": "application/json",
     "Content-Type": "application/x-www-form-urlencoded",
     "WM_SVC.NAME": "Walmart Marketplace",
-    "WM_QOS.CORRELATION_ID": "1234567890"
+    #"WM_QOS.CORRELATION_ID": "1234567890"
 }
 
 def get_token():    
@@ -48,3 +48,4 @@ def is_blocked(response):
         if "Robot Check" in response.text or "/blocked?" in response.text.lower():
             return True
     return False
+
