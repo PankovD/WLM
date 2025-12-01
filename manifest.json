@@ -1,6 +1,6 @@
 {
-  "version": "0.2.1",
-  "description": "Configured for smaller installer file and smaller final program size.",
+  "version": "0.2.2",
+  "description": "WLM updated API documentation.",
   "files": [
     {
       "path": "core/__init__.py",
@@ -56,3 +56,4 @@
     }
   ]
 }
+
