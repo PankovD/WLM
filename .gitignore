@@ -1,1 +1,26 @@
 launcher.py
+
+# venv
+include/
+lib/
+scripts/
+pyvenv.cfg
+requirements.txt
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Локальний стан апдейтера
+version.json
+
+# Виходні файли програми
+logging/
+*.xlsx
+*.csv
+
+# Локальні юзерські налаштування (не йдуть в репо)
+core/credentials.json
+core/config/configured_columns.json
+.claude/

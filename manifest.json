@@ -1,59 +1,71 @@
 {
-  "version": "0.2.2",
+  "version": "0.2.6",
   "description": "WLM updated API documentation.",
   "files": [
     {
       "path": "core/__init__.py",
-      "url": "https://raw.githubusercontent.com/PankovD/WLM/main/core/__init__.py"
-    },    
+      "url": "https://raw.githubusercontent.com/PankovD/WLM/main/core/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
     {
       "path": "core/config.py",
-      "url": "https://raw.githubusercontent.com/PankovD/WLM/main/core/config.py"
+      "url": "https://raw.githubusercontent.com/PankovD/WLM/main/core/config.py",
+      "sha256": "f617951a0e54f48fb9f026796423e5ff3954f6626b25e31251f3345913aa1413"
     },
     {
       "path": "core/auth.py",
-      "url": "https://raw.githubusercontent.com/PankovD/WLM/main/core/auth.py"
+      "url": "https://raw.githubusercontent.com/PankovD/WLM/main/core/auth.py",
+      "sha256": "9a0b6cbb622b1cf8d581f42586d163411eb159e6dc7f7443a5011332783b7179"
     },
     {
       "path": "core/constants.py",
-      "url": "https://raw.githubusercontent.com/PankovD/WLM/main/core/constants.py"
+      "url": "https://raw.githubusercontent.com/PankovD/WLM/main/core/constants.py",
+      "sha256": "cfcc28495b6e1162b96154fc795335f4f3a932078eb3dc00d1779b4e8b1595fa"
     },
     {
       "path": "core/gui.py",
-      "url": "https://raw.githubusercontent.com/PankovD/WLM/main/core/gui.py"
+      "url": "https://raw.githubusercontent.com/PankovD/WLM/main/core/gui.py",
+      "sha256": "c8a59c3a9d3b274c929450efc8cf08905302ca430014fc1081254867b9f46cd2"
     },
     {
       "path": "core/io_utils.py",
-      "url": "https://raw.githubusercontent.com/PankovD/WLM/main/core/io_utils.py"
+      "url": "https://raw.githubusercontent.com/PankovD/WLM/main/core/io_utils.py",
+      "sha256": "de51cd513112b23b3099da2ed586f79d79abab2637b1e39f3ecdb904aab92605"
     },
     {
       "path": "core/network.py",
-      "url": "https://raw.githubusercontent.com/PankovD/WLM/main/core/network.py"
+      "url": "https://raw.githubusercontent.com/PankovD/WLM/main/core/network.py",
+      "sha256": "dd81d7a94323647163f65b37e0d7e813665364f6d86f946ce74e95882122058a"
     },
     {
       "path": "core/processing.py",
-      "url": "https://raw.githubusercontent.com/PankovD/WLM/main/core/processing.py"
+      "url": "https://raw.githubusercontent.com/PankovD/WLM/main/core/processing.py",
+      "sha256": "feee0547fc2d5af152447fde8d99def7cdc893358c003f0ed480e61737a2528f"
     },
     {
       "path": "core/main.py",
-      "url": "https://raw.githubusercontent.com/PankovD/WLM/main/core/main.py"
+      "url": "https://raw.githubusercontent.com/PankovD/WLM/main/core/main.py",
+      "sha256": "e356849bc7f70b96f46e8bca59e943e5206b2588bebc6a1854b5afba4dba54a1"
     },
     {
       "path": "core/config/columns.json",
-      "url": "https://raw.githubusercontent.com/PankovD/WLM/main/core/config/columns.json"
+      "url": "https://raw.githubusercontent.com/PankovD/WLM/main/core/config/columns.json",
+      "sha256": "4b895d51fdcba233fcd0a6f790f879889437461d9b143268dee529f49a29c7ab"
     },
     {
       "path": "core/config/default_columns.json",
-      "url": "https://raw.githubusercontent.com/PankovD/WLM/main/core/config/default_columns.json"
+      "url": "https://raw.githubusercontent.com/PankovD/WLM/main/core/config/default_columns.json",
+      "sha256": "e5d3fd88c10ee38a961ad79435a3770e549e89c99f185d625467ac77af5dd11a"
     },
     {
       "path": "core/walmart.ico",
-      "url": "https://raw.githubusercontent.com/PankovD/WLM/main/core/walmart.ico"
+      "url": "https://raw.githubusercontent.com/PankovD/WLM/main/core/walmart.ico",
+      "sha256": "ab6ef9c568a94a56f1b7cadf4f76536dcaee7759f8d93cb96470d300cce19bf5"
     },
     {
       "path": "walmart.ico",
-      "url": "https://raw.githubusercontent.com/PankovD/WLM/main/core/walmart.ico"
+      "url": "https://raw.githubusercontent.com/PankovD/WLM/main/core/walmart.ico",
+      "sha256": "ab6ef9c568a94a56f1b7cadf4f76536dcaee7759f8d93cb96470d300cce19bf5"
     }
   ]
 }
-

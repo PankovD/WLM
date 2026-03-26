@@ -13,21 +13,23 @@ HEADERS_BASE = {
     #"WM_QOS.CORRELATION_ID": "1234567890"
 }
 
-def get_token():    
-    while True:
+MAX_TOKEN_RETRIES = 10
+
+def get_token():
+    for attempt in range(1, MAX_TOKEN_RETRIES + 1):
         try:
             resp = requests.post(TOKEN_URL, headers=HEADERS_BASE, data="grant_type=client_credentials", timeout=10)
             if resp.status_code == 200:
                 token = resp.json().get("access_token")
                 logging.info("OAuth Token received.")
-                break
+                return token
             else:
-                logging.warning(f"Token error {resp.status_code}, retrying...")
+                logging.warning(f"Token error {resp.status_code} (attempt {attempt}/{MAX_TOKEN_RETRIES}), retrying...")
                 time.sleep(5)
         except RequestException as e:
-            logging.error(f"Token request failed: {e}")
+            logging.error(f"Token request failed (attempt {attempt}/{MAX_TOKEN_RETRIES}): {e}")
             time.sleep(5)
-    return token
+    raise RuntimeError(f"Failed to obtain Walmart API token after {MAX_TOKEN_RETRIES} attempts. Check API credentials and network.")
 
 def wait_for_connection():
     logging.info("Network issue detected. Waiting for connection to be restored...")
