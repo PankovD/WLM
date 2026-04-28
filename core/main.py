@@ -1,3 +1,4 @@
+from core import gui
 import os
 import time
 import threading
@@ -8,14 +9,13 @@ from .processing import collect_ids, load_ids_from_file, writer_worker, consumer
 import sys
 from .config import OUTPUT_FOLDER
 
+status = {
+    'total_rows_written': 0,
+    'not_found': 0,
+    'blocks': 0
+}
 
 def run_app():
-    status = {
-        'total_rows_written': 0,
-        'not_found': 0,
-        'blocks': 0
-    }
-
     mode = choose_mode(current_user=None)
     if not mode:
         return
@@ -30,23 +30,21 @@ def run_app():
     input_name = os.path.splitext(os.path.basename(selected_file))[0]
     input_folder = os.path.dirname(selected_file)
     results_file = os.path.join(input_folder, f"{input_name}_parsed_{dt_str}.xlsx")
-
-    id_queue = Queue(maxsize=100)  # bounded — prevents OOM on large batches
+    
+    id_queue = Queue()
     excel_queue = Queue()
     progress_queue = Queue()
     file_lock = threading.Lock()
 
     # Writer
     t_writer = threading.Thread(target=writer_worker,
-                                args=(excel_queue, file_lock, results_file, column_names, progress_queue, status),
-                                daemon=True)
+                                args=(excel_queue, file_lock, results_file, column_names, progress_queue, status))
     t_writer.start()
 
     # Producer
     if mode == 'upc':
         t_prod = threading.Thread(target=collect_ids,
-                                  args=(id_queue, excel_queue, selected_file, key_col, price_col, column_names, status),
-                                  daemon=True)
+                                  args=(id_queue, excel_queue, selected_file, key_col, price_col, column_names, status))
         t_prod.start()
     else:
         load_ids_from_file(id_queue, selected_file, key_col, price_col, column_names)
@@ -55,27 +53,14 @@ def run_app():
     consumers = []
     for _ in range(3):
         t = threading.Thread(target=consumer_worker,
-                              args=(id_queue, excel_queue, column_names, results_file, status),
-                              daemon=True)
+                              args=(id_queue, excel_queue, column_names))
         t.start()
         consumers.append(t)
 
-    # Monitor thread: waits for all workers, then signals writer to finish
-    def monitor():
-        if mode == 'upc':
-            t_prod.join()
-        for _ in consumers:
-            id_queue.put(None)
-        for t in consumers:
-            t.join()
-        excel_queue.put(None)  # sentinel for writer_worker
-
-    t_monitor = threading.Thread(target=monitor, daemon=True)
-    t_monitor.start()
-
-    # Finish callback — called from main thread when progress bar detects completion
+    # Progress Bar
     def finish_cb():
-        t_writer.join()  # writer just finished (sent None to progress_queue)
+        excel_queue.put(None)  # <--- тут, не в main потоці
+        t_writer.join()
         elapsed = int(time.time() - start)
         hours, rem = divmod(elapsed, 3600)
         minutes, seconds = divmod(rem, 60)
@@ -86,17 +71,30 @@ def run_app():
         logging.info("Total blocks: %d", status['blocks'])
         logging.info("Total time taken: %s", time_str)
         logging.info("Results saved in: %s", results_file)
+        
 
         show_summary(
             total_rows_written=status['total_rows_written'],
-            time_str=time_str,
+            time_str=f"{hours:02}:{minutes:02}:{seconds:02}",
             results_file=results_file,
-            blocks=status['blocks'],
             not_found=status['not_found']
         )
 
-    # Progress bar runs on MAIN THREAD (Tkinter is not thread-safe)
-    show_progress_bar(total_rows, progress_queue, finish_cb)
+
+    t_progress = threading.Thread(target=show_progress_bar,
+                                  args=(total_rows, progress_queue, finish_cb))
+    t_progress.start()
+
+    # Очікування завершення
+    if mode == 'upc':
+        t_prod.join()
+    for _ in consumers:
+        id_queue.put(None)
+    for t in consumers:
+        t.join()
+    
+    excel_queue.join()
+    t_writer.join()
 
 
 if __name__ == '__main__':

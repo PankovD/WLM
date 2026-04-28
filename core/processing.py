@@ -5,21 +5,17 @@ import json
 import logging
 import requests
 import httpx
-from urllib.parse import urljoin, urlparse
-from parsel import Selector
+from urllib.parse import urljoin
+from scrapy.selector import Selector
 from .constants import BASE_HEADERS
+from .column_resolver import resolve_column
 from requests.exceptions import RequestException
-from queue import Queue
 from openpyxl import Workbook
 from .constants import CONFIGURED_FILE, DEFAULT_FILE
-from .network import get_token, is_blocked, random_sleep, wait_for_connection
+from .network import get_token, is_blocked, wait_for_connection
 from .config import OUTPUT_ID_CSV
 import csv
 import pandas as pd
-import sys
-
-# Shared lock for thread-safe status dict updates across all worker threads
-_status_lock = threading.Lock()
 
 def get_column_defs():
     if not os.path.exists(CONFIGURED_FILE):
@@ -32,16 +28,15 @@ def get_column_defs():
 
     
 
-# Walmart API: оновлювати токен кожні ~200 запитів
-TOKEN_REFRESH_LIMIT = 199
-# Пауза після блокування Walmart (секунди)
-BLOCK_WAIT_SEC = 180
-
+not_found = 0
 def collect_ids(id_queue, excel_queue, selected_file, upc_col, price_col, column_names, status=None):
+    token = None
+    global not_found
     lines = 0
+
+    # Отримання OAuth токена
     token = get_token()
     column_defs = get_column_defs()
-
     infile = None
     writer_file = open(OUTPUT_ID_CSV, 'w', newline='', encoding='utf-8')
     try:
@@ -50,103 +45,107 @@ def collect_ids(id_queue, excel_queue, selected_file, upc_col, price_col, column
         writer_file.flush()
         os.fsync(writer_file.fileno())
 
-        # Відкриваємо файл з UPC або Excel залежно від розширення
         if selected_file.lower().endswith('.csv'):
             infile = open(selected_file, 'r', encoding='utf-8', errors='replace')
-            iterator = csv.reader(infile)
+            reader = csv.reader(infile)
+            iterator = reader
             try:
-                next(iterator)  # пропускаємо заголовок
+                next(iterator)
             except StopIteration:
                 pass
         else:
             df_upc = pd.read_excel(selected_file, dtype=str).fillna('')
             iterator = df_upc.itertuples(index=False, name=None)
 
-        api_headers = {
-            "Accept": "application/json",
-            "WM_SVC.NAME": "Walmart Marketplace",
-            "WM_QOS.CORRELATION_ID": "1234567890"
-        }
+        for row in iterator:
+            row = [str(cell) for cell in row]
+            original_upc = row[column_names.index(upc_col)].strip()
+            if original_upc.startswith('0'):
+                trial_upc = original_upc
+                _trial_upc = original_upc.lstrip('0')
+            else:
+                trial_upc = '0' + original_upc
+                _trial_upc = original_upc
 
-        # Reuse TCP connections for all UPC API requests
-        with requests.Session() as session:
-            for row in iterator:
-                row = [str(cell) for cell in row]
-                original_upc = row[column_names.index(upc_col)].strip()
-                if original_upc.startswith('0'):
-                    trial_upc = original_upc
-                    _trial_upc = original_upc.lstrip('0')
+            price = row[column_names.index(price_col)] if price_col else ''
+            item_id = None
+
+            for _ in range(3):
+                try:
+                    url = f"https://marketplace.walmartapis.com/v3/items/walmart/search?query={trial_upc}"
+                    h = {
+                        "WM_SEC.ACCESS_TOKEN": token,
+                        "Accept": "application/json",
+                        "WM_SVC.NAME": "Walmart Marketplace",
+                        "WM_QOS.CORRELATION_ID": "1234567890"
+                    }
+                    r = requests.get(url, headers=h, timeout=10)
+                except RequestException as e:
+                    logging.error(f"Network error for UPC {original_upc}: {e}")
+                    wait_for_connection()
+                    continue
+                if r.status_code == 200:
+                    data = r.json()
+                    if data.get('items'):
+                        item_id = data['items'][0]['itemId']
+                if item_id:
+                    break
                 else:
-                    trial_upc = '0' + original_upc
-                    _trial_upc = original_upc
+                    trial_upc = '0' + trial_upc
 
-                price = row[column_names.index(price_col)] if price_col else ''
-                item_id = None
-
-                # Пошук через API з трьома спробами
-                for attempt in range(3):
-                    try:
-                        url = f"https://marketplace.walmartapis.com/v3/items/walmart/search?query={trial_upc}"
-                        h = {**api_headers, "WM_SEC.ACCESS_TOKEN": token}
-                        r = session.get(url, headers=h, timeout=10)
-                    except RequestException as e:
-                        logging.error(f"Network error for UPC {original_upc}: {e}")
-                        wait_for_connection()
-                        continue
+            if not item_id:
+                try:
+                    url = f"https://marketplace.walmartapis.com/v3/items/walmart/search?query={_trial_upc}"
+                    h = {
+                        "WM_SEC.ACCESS_TOKEN": token,
+                        "Accept": "application/json",
+                        "WM_SVC.NAME": "Walmart Marketplace",
+                        "WM_QOS.CORRELATION_ID": "1234567890"
+                    }
+                    r = requests.get(url, headers=h, timeout=10)
                     if r.status_code == 200:
                         data = r.json()
                         if data.get('items'):
                             item_id = data['items'][0]['itemId']
-                    if item_id:
-                        break
+                except RequestException as e:
+                    logging.error(f"Network error for UPC {original_upc}: {e}")
+                    wait_for_connection()
+
+            original = dict(zip(column_names, row))
+            original['UPC'], original['Price'] = original_upc, price
+
+            if item_id:
+                writer.writerow([trial_upc, item_id, price] + row)
+                logging.info(f"Found ID {item_id} for UPC {original_upc}")
+                id_queue.put((item_id, original))
+            else:
+                writer.writerow([original_upc, 'Not Found', price] + row)
+                with total_rows_lock:
+                    global not_found
+                    not_found += 1
+                if status:
+                    status['not_found'] += 1
+                logging.warning(f"UPC {original_upc} not found after 3 retries")
+
+                headers = [col['header'] for col in column_defs] + column_names
+                notfound_row_data = {}
+                for col in column_defs:
+                    if col['header'] == 'Product ID':
+                        notfound_row_data[col['header']] = 'Not Found'
                     else:
-                        trial_upc = '0' + trial_upc
+                        notfound_row_data[col['header']] = ''
+                for col in column_names:
+                    notfound_row_data[col] = original.get(col, '')
+                notfound_row = [notfound_row_data.get(h, '') for h in headers]
+                excel_queue.put(notfound_row)
 
-                # Додаткова спроба без ведучого нуля
-                if not item_id:
-                    try:
-                        url = f"https://marketplace.walmartapis.com/v3/items/walmart/search?query={_trial_upc}"
-                        h = {**api_headers, "WM_SEC.ACCESS_TOKEN": token}
-                        r = session.get(url, headers=h, timeout=10)
-                        if r.status_code == 200:
-                            data = r.json()
-                            if data.get('items'):
-                                item_id = data['items'][0]['itemId']
-                    except RequestException as e:
-                        logging.error(f"Network error for UPC {original_upc}: {e}")
-                        wait_for_connection()
+            writer_file.flush()
+            os.fsync(writer_file.fileno())
 
-                original = dict(zip(column_names, row))
-                original['UPC'], original['Price'] = original_upc, price
-
-                # Запис результату
-                if item_id:
-                    writer.writerow([trial_upc, item_id, price] + row)
-                    logging.info(f"Found ID {item_id} for UPC {original_upc}")
-                    id_queue.put((item_id, original))
-                else:
-                    writer.writerow([original_upc, 'Not Found', price] + row)
-                    if status is not None:
-                        with _status_lock:
-                            status['not_found'] += 1
-                    logging.warning(f"UPC {original_upc} not found after 3 retries")
-
-                    hdrs = [col['header'] for col in column_defs] + column_names
-                    notfound_row_data = {}
-                    for col in column_defs:
-                        notfound_row_data[col['header']] = 'Not Found' if col['header'] == 'Product ID' else ''
-                    for col in column_names:
-                        notfound_row_data[col] = original.get(col, '')
-                    excel_queue.put([notfound_row_data.get(h, '') for h in hdrs])
-
-                writer_file.flush()
-                os.fsync(writer_file.fileno())
-
-                lines += 1
-                if lines >= TOKEN_REFRESH_LIMIT:
-                    token = get_token()
-                    lines = 0
-
+            lines += 1
+            if lines >= 199:
+                token = get_token()
+                lines = 0
     finally:
         writer_file.close()
         if infile is not None:
@@ -165,13 +164,21 @@ def load_ids_from_file(id_queue, selected_file, id_col, price_col, column_names)
     id_queue.put(None)
 
 # ------------------- Writer: Запис рядків у Excel -------------------
+# result_header = [
+#     'Store Page', 'Catalog Page', 'Product Title', 'Product ID',
+#     'Selling Price', 'Active Sellers', 'Ratings', 'Average Rating',
+#     'Current Seller', 'UPC', 'PRICE'
+# ]
 
-EXCEL_SAVE_INTERVAL = 10  # зберігати файл кожні N рядків
+wb = Workbook()
+ws = wb.active
+
+total_rows_written = 0
+blocks = 0
+total_rows_lock = threading.Lock()
 
 def writer_worker(excel_queue, file_write_lock, results_file, column_names, progress_queue=None, status=None):
-    wb = Workbook()
-    ws = wb.active
-    total_rows_written = 0
+    global total_rows_written
     column_defs = get_column_defs()
     headers = [col['header'] for col in column_defs] + column_names
     UPC_INDEX = headers.index("UPC")
@@ -185,26 +192,23 @@ def writer_worker(excel_queue, file_write_lock, results_file, column_names, prog
         with file_write_lock:
             upc = row[UPC_INDEX] if len(row) > UPC_INDEX else "N/A"
             ws.append(row)
-            total_rows_written += 1
-            should_save = (total_rows_written % EXCEL_SAVE_INTERVAL == 0)
-            if progress_queue:
-                progress_queue.put(1)
-            print(f"\rTotal rows written: {total_rows_written}", end="", flush=True)
-            logging.info(f"Row {upc} written to Excel.")
-        # Save outside lock to avoid blocking consumers during I/O
-        if should_save:
             wb.save(results_file)
-        if status is not None:
-            with _status_lock:
-                status['total_rows_written'] = total_rows_written
+            with total_rows_lock:
+                total_rows_written += 1
+                if status is not None:
+                    status['total_rows_written'] = total_rows_written
+                if progress_queue:
+                    progress_queue.put(1)
+                logging.info(f"Total rows written: {total_rows_written}")
+            logging.info(f"Row {upc} written to Excel.")
+            
         excel_queue.task_done()
-
-    wb.save(results_file)  # фінальний запис залишків
+    
     if progress_queue:
         progress_queue.put(None)
 
 # ------------------- Original consumer -------------------
-def consumer_worker(id_queue, excel_queue, column_names, results_file, status=None):
+def consumer_worker(id_queue, excel_queue, column_names):
     h_index = 0
     blocks = 0
     column_defs = get_column_defs()
@@ -222,9 +226,8 @@ def consumer_worker(id_queue, excel_queue, column_names, results_file, status=No
             # ↓ Винесемо product_url назовні, щоб можна було його перезаписати
             product_url = f'https://www.walmart.com/ip/{product_id}?redirect=false'
 
-            for attempt in range(3):
+            for _ in range(3):
                 try:
-                    # ↓ Тепер беремо request саме по product_url (а не щодового формування f-string)
                     r = client.get(product_url,
                                    headers=BASE_HEADERS[h_index],
                                    follow_redirects=False)
@@ -235,29 +238,21 @@ def consumer_worker(id_queue, excel_queue, column_names, results_file, status=No
                 # Якщо побачили блокування — повертаємо в чергу і виходимо
                 if is_blocked(r):
                     blocks += 1
-                    if status is not None:
-                        with _status_lock:
-                            status['blocks'] = status.get('blocks', 0) + 1
                     logging.warning(
                         f"Blocked for UPC {original.get('UPC','')}, re-enqueueing once"
                     )
                     id_queue.task_done()
                     id_queue.put((product_id, original))
-                    for remaining in range(BLOCK_WAIT_SEC, 0, -10):
-                        logging.info(f"Block cooldown: {remaining}s remaining")
-                        time.sleep(10)
+                    time.sleep(180)
                     blocked = True
                     break
 
                 # Якщо статус 301/302/… — поновлюємо product_url на поточну Location та пробуємо ще раз
                 if r.status_code in (301, 302, 303, 307, 308):
+                    # ↓ тут беремо зворот URL із заголовка іще раз запитом
                     new_location = r.headers.get("Location")
                     if new_location:
-                        parsed_loc = urlparse(new_location)
-                        # Block open redirects to external domains
-                        if parsed_loc.scheme and parsed_loc.netloc and parsed_loc.netloc != "www.walmart.com":
-                            logging.warning("Redirect to external domain blocked: %s", new_location)
-                            break
+                        # Якщо Location видається відносним, додаємо домен вручну
                         product_url = urljoin("https://www.walmart.com", new_location)
                     continue  # переходимо до наступного attempt уже з оновленим product_url
 
@@ -289,48 +284,17 @@ def consumer_worker(id_queue, excel_queue, column_names, results_file, status=No
                 )
                 if not idml:
                     continue
-#----------------------NEW BLOCK--------------------
                 data_sources = {
                     'product': prod,
+                    'prod': prod,
                     'idml': idml,
                     'original': original,
                     'product_url': product_url.replace("?redirect=false", ""),
                     'current': prod.get('priceInfo', {}).get('currentPrice', {})
                 }
 
-                def get_by_path(data_sources, path):
-                    try:
-                        parts = path.split('.')
-                        current = data_sources.get(parts[0])
-                        for part in parts[1:]:
-                            if isinstance(current, list):
-                                # Претендуємо, що це список словників зі схемою name/value
-                                name_map = {item.get("name"): item.get("value") for item in current if isinstance(item, dict)}
-                                current = name_map.get(part, "")
-                            elif isinstance(current, dict):
-                                current = current.get(part)
-                            else:
-                                return ''
-                        if isinstance(current, (list, dict)):
-                            return json.dumps(current, ensure_ascii=False)
-                        return current if current is not None else ''
-                    except Exception as e:
-                        logging.debug("get_by_path failed for '%s': %s", path, e)
-                        return ''
-
                 row_data = {
-                    **{
-                        col['header']: (
-                            eval(col['expression'], {"__builtins__": {}}, {
-                                'product_url': product_url,
-                                'original': original,
-                                'prod': prod,
-                                'idml': idml,
-                                'current': prod.get('priceInfo', {}).get('currentPrice', {})
-                            }) if 'expression' in col else get_by_path(data_sources, col['json_path'])
-                        )
-                        for col in column_defs
-                    },
+                    **{col['header']: resolve_column(col, data_sources) for col in column_defs},
                     **{col: original.get(col, '') for col in column_names}
                 }
 
@@ -342,17 +306,15 @@ def consumer_worker(id_queue, excel_queue, column_names, results_file, status=No
                 excel_queue.put(row)
 
                 success = True
-                break  # вдалий парсинг, виходимо з attempts
+                break
 
             if blocked:
-                # Якщо був блок, уже зробили task_done/put → просто продовжуємо
                 continue
 
             if success:
                 id_queue.task_done()
                 continue
 
-            # Якщо 3 спроби не дали результат (й ми не були заблоковані), фіксуємо помилку та закриваємо задачу
             logging.error(f"Failed to process item {product_id} after 3 attempts")
             id_queue.task_done()
 

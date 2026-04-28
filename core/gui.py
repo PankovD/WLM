@@ -7,8 +7,6 @@ import ctypes
 from queue import Empty
 import json
 import sys
-import subprocess
-import logging
 from .auth import delete_account_rpc, change_password_rpc, load_credentials, CREDENTIALS_FILE
 from .constants import COLUMNS_FILE, CONFIGURED_FILE, DEFAULT_FILE, APP_NAME
 import keyring
@@ -16,9 +14,31 @@ from PIL import Image, ImageTk
 import threading
 
 try:
-    ctypes.windll.shcore.SetProcessDpiAwareness(1)  # DPI-aware
+    ctypes.windll.shcore.SetProcessDpiAwareness(1)
 except Exception:
     pass
+
+
+def _center_window(window, width=None, height=None):
+    """Center a Toplevel or Tk window on screen."""
+    window.update_idletasks()
+    w = width or window.winfo_width() or window.winfo_reqwidth()
+    h = height or window.winfo_height() or window.winfo_reqheight()
+    sw = window.winfo_screenwidth()
+    sh = window.winfo_screenheight()
+    x = (sw - w) // 2
+    y = (sh - h) // 2
+    window.geometry(f"{w}x{h}+{x}+{y}")
+
+
+def _get_dpi_scale():
+    try:
+        hdc = ctypes.windll.user32.GetDC(0)
+        dpi = ctypes.windll.gdi32.GetDeviceCaps(hdc, 88)
+        ctypes.windll.user32.ReleaseDC(0, hdc)
+        return dpi / 96.0
+    except Exception:
+        return 1.0
 if getattr(sys, 'frozen', False):
     # Якщо .exe — беремо директорію з .exe (onedir launcher.exe)
     base_dir = os.path.dirname(sys.executable)
@@ -49,8 +69,7 @@ class ColumnConfigWindow:
         try:
             with open(fn, 'r', encoding='utf-8') as f:
                 return json.load(f)
-        except (json.JSONDecodeError, OSError) as e:
-            logging.warning("Could not load JSON from %s: %s", fn, e)
+        except (json.JSONDecodeError, OSError, ValueError):
             return []
 
     def _build_ui(self):
@@ -195,7 +214,7 @@ def clear_credentials(username):
     try:
         keyring.delete_password(APP_NAME, username)
     except Exception:
-        pass  # keyring entry may not exist — intentionally ignored
+        pass
 
 def get_version():
     try:
@@ -315,15 +334,13 @@ def choose_mode(current_user=None):
     inner = tk.Frame(logo_frame, bg='white')
     inner.pack()
 
-    logo_image_path = os.path.join(base_dir, "walmart.ico")
-    try:
-        img = Image.open(logo_image_path).resize((32, 32), Image.LANCZOS)
-        logo_img = ImageTk.PhotoImage(img, master=win)
-        logo_label = ttk.Label(inner, image=logo_img, font=("Segoe UI Emoji", 24), background='white')
-        logo_label.image = logo_img
-        logo_label.pack(side='left')
-    except FileNotFoundError:
-        pass
+    logo_image_path = os.path.join(base_dir, "walmart.ico")  # або абсолютний шлях
+    img = Image.open(logo_image_path).resize((32, 32), Image.LANCZOS)
+    logo_img = ImageTk.PhotoImage(img, master=win)
+
+    logo_label = ttk.Label(inner, image=logo_img, font=("Segoe UI Emoji", 24), background='white')
+    logo_label.image = logo_img
+    logo_label.pack(side='left')
 
 
     title_label = ttk.Label(inner, text="Walmart Parser", font=("Segoe UI", 16, "bold"), background='white')
@@ -352,7 +369,6 @@ def choose_mode(current_user=None):
         info_win = tk.Toplevel(win)
         info_win_ref['window'] = info_win
         info_win.title("Program Info")
-        #info_win.geometry("400x250")
         info_win.resizable(False, False)
         
 
@@ -369,9 +385,10 @@ def choose_mode(current_user=None):
         tk.Label(info_frame, text=label_text, wraplength=380, justify="left", bg="white", font=("Segoe UI", 10)).pack(pady=(10))
         
         def on_close():
-            info_win_ref['window'] = None  # очищаємо посилання
+            info_win_ref['window'] = None
             info_win.destroy()
         ttk.Button(info_frame, text="Close", style='Exit.TButton', command=on_close).pack(pady=20)
+        _center_window(info_win)
 
     button_row = tk.Frame(container, bg='white')
     button_row.pack(pady=10)
@@ -388,11 +405,10 @@ def choose_mode(current_user=None):
     
     def app_exit():
         win.destroy()
-        win.quit()
         sys.exit(0)
 
-    btn_upc = fixed_button(button_row, "UPC/EAN", lambda: set_and_close('upc'))
-    btn_id  = fixed_button(button_row, "Item ID", lambda: set_and_close('id'))
+    fixed_button(button_row, "UPC/EAN", lambda: set_and_close('upc'))
+    fixed_button(button_row, "Item ID", lambda: set_and_close('id'))
 
     btn_info = ttk.Button(container, text="ℹ", width= 3, style='FlatInfo.TButton', command=show_info_window)
     btn_info.place(relx=1.0, x=-10, y=45, anchor='ne')
@@ -416,7 +432,8 @@ def choose_mode(current_user=None):
         col_win = tk.Toplevel()
         columns_config_ref['window'] = col_win
         col_win.title("Configure Columns")
-        col_win.geometry("800x700")
+        _sc = _get_dpi_scale()
+        _center_window(col_win, int(800 * _sc), int(700 * _sc))
         
         # col_win.grab_set()  # але блокує інші вікна поки відкрито це
         s = ttk.Style(col_win)
@@ -474,7 +491,7 @@ def choose_mode(current_user=None):
             foreground=[('active', '#333333')],
             relief=[('active', 'flat')])
 
-        app = ColumnConfigWindow(col_win)
+        ColumnConfigWindow(col_win)
 
     def open_settings():
 
@@ -485,9 +502,10 @@ def choose_mode(current_user=None):
         set_win = tk.Toplevel(win)
         set_win_ref['window'] = set_win
         set_win.title("Settings")
-        set_win.geometry("400x350")
         set_win.resizable(False, False)
         set_win.attributes('-topmost', True)
+        _sc = _get_dpi_scale()
+        _center_window(set_win, int(400 * _sc), int(350 * _sc))
 
         set_frame = tk.Frame(set_win, bg='white', padx=20, pady=20)
         set_frame.pack(expand=True, fill='both')
@@ -517,9 +535,10 @@ def choose_mode(current_user=None):
         dlg = tk.Toplevel(win)
         pw_win_ref['window'] = dlg
         dlg.title("Delete Account")
-        dlg.geometry("350x200")
         dlg.resizable(False, False)
         dlg.attributes('-topmost', True)
+        _sc = _get_dpi_scale()
+        _center_window(dlg, int(350 * _sc), int(200 * _sc))
 
         dlg_frame = tk.Frame(dlg, bg='white', padx=20, pady=20)
         dlg_frame.pack(expand=True, fill='both')
@@ -550,9 +569,10 @@ def choose_mode(current_user=None):
         dlg = tk.Toplevel(win)
         pw_win_ref['window'] = dlg
         dlg.title("Change Password")
-        dlg.geometry("350x320")
         dlg.resizable(False, False)
         dlg.attributes('-topmost', True)
+        _sc = _get_dpi_scale()
+        _center_window(dlg, int(350 * _sc), int(320 * _sc))
 
         dlg_frame = tk.Frame(dlg, bg='white', padx=20, pady=20)
         dlg_frame.pack(expand=True, fill='both')
@@ -584,8 +604,8 @@ def choose_mode(current_user=None):
 
         ttk.Button(dlg_frame, text="Confirm Change", style='Other.TButton', command=on_confirm_change).pack(pady=15)
         
-    win.bind('<Return>', lambda e: set_and_close('upc'))
-    win.bind('<Escape>', lambda e: win.destroy())
+    win.bind('<Return>', lambda _: set_and_close('upc'))
+    win.bind('<Escape>', lambda _: win.destroy())
 
     win.mainloop()
     return mode['value']
@@ -602,42 +622,57 @@ def count_rows_in_file(file_path):
 
 # ------------------- Вікно вибору файлу та колонок -------------------
 def choose_file_and_columns(id_mode=False):
-    # Temporary root just for file dialog — destroyed immediately after
-    _root = tk.Tk()
-    _root.withdraw()
+    root = tk.Tk()
+    root.withdraw()
     file_path = filedialog.askopenfilename(
         title="Select a file",
         filetypes=[("Excel files", "*.xlsx;*.xls"), ("CSV files", "*.csv"), ("All files", "*.*")]
     )
-    _root.destroy()  # always destroy, even on cancel
-
     if not file_path:
         return None, None, None, None, None
 
-    # Read file with error handling and empty check
-    try:
-        df = pd.read_csv(file_path, dtype=str) if file_path.endswith('.csv') else pd.read_excel(file_path, dtype=str)
-    except Exception as e:
-        _err = tk.Tk()
-        _err.withdraw()
-        messagebox.showerror("Error", f"Failed to read file: {e}", parent=_err)
-        _err.destroy()
+    read_result = {'df': None, 'rows': None, 'error': None}
+
+    def _read_file():
+        try:
+            read_result['df'] = (
+                pd.read_csv(file_path, dtype=str)
+                if file_path.lower().endswith('.csv')
+                else pd.read_excel(file_path, dtype=str)
+            )
+            read_result['rows'] = count_rows_in_file(file_path)
+        except Exception as exc:
+            read_result['error'] = exc
+
+    loading = tk.Toplevel(root)
+    loading.overrideredirect(True)
+    loading.configure(bg='white')
+    tk.Label(loading, text="  Reading file…  ", padx=20, pady=20,
+             font=("Segoe UI", 12), bg='white').pack()
+    loading.update_idletasks()
+    lw, lh = loading.winfo_reqwidth(), loading.winfo_reqheight()
+    sw, sh = loading.winfo_screenwidth(), loading.winfo_screenheight()
+    loading.geometry(f"+{(sw - lw) // 2}+{(sh - lh) // 2}")
+
+    _t = threading.Thread(target=_read_file, daemon=True)
+    _t.start()
+    while _t.is_alive():
+        root.update()
+        _t.join(0.05)
+    loading.destroy()
+
+    if read_result['error']:
+        root.destroy()
+        messagebox.showerror("File Error", f"Cannot read file:\n{read_result['error']}")
         return None, None, None, None, None
 
-    if df.empty or len(df.columns) == 0:
-        _warn = tk.Tk()
-        _warn.withdraw()
-        messagebox.showwarning("Warning", "The selected file is empty or has no columns.", parent=_warn)
-        _warn.destroy()
-        return None, None, None, None, None
-
-    total_rows = len(df)   # reuse already-read df, no second file read
-    column_names = df.columns.tolist()
+    df = read_result['df']
+    total_rows = read_result['rows']
 
     column_window = tk.Tk()
     column_window.title("Select Columns")
     column_window.resizable(False, False)
-
+    
     column_window.configure(bg='white')
     width, height = 500, 250
     column_window.update_idletasks()
@@ -646,7 +681,8 @@ def choose_file_and_columns(id_mode=False):
     x = (screen_width // 2) - (width // 2)
     y = (screen_height // 2) - (height // 2)
     column_window.geometry(f"{width}x{height}+{x}+{y}")
-
+    column_names = df.columns.tolist()
+    
     s = ttk.Style(column_window)
     s.theme_use('clam')
     s.configure(
@@ -661,22 +697,22 @@ def choose_file_and_columns(id_mode=False):
     )
 
     label_text = "Select the column that contains Item ID:" if id_mode else "Select the column that contains UPC/EAN:"
-    ttk.Label(column_window, text=label_text, style="WhiteBold.TLabel").pack(pady=10)
+    ttk.Label(column_window, text=label_text,style=("WhiteBold.TLabel")).pack(pady=10)
     id_dropdown = ttk.Combobox(column_window, values=column_names)
     id_dropdown.pack(pady=5)
     id_dropdown.current(0)
-    ttk.Label(column_window, text="Select the column that contains Price (optional):", style="White.TLabel").pack(pady=5)
+    ttk.Label(column_window, text="Select the column that contains Price (optional):",style=("White.TLabel")).pack(pady=5)
     price_dropdown = ttk.Combobox(column_window, values=["<None>"] + column_names)
     price_dropdown.pack(pady=5)
     price_dropdown.current(0)
-    selected_id = tk.StringVar()
-    selected_price = tk.StringVar()
+    selection = {'id': None, 'price': None, 'confirmed': False}
 
     def on_select():
-        selected_id.set(id_dropdown.get())
-        selected_price.set(price_dropdown.get() if price_dropdown.get() != "<None>" else None)
+        selection['id'] = id_dropdown.get()
+        raw_price = price_dropdown.get()
+        selection['price'] = raw_price if raw_price != "<None>" else None
+        selection['confirmed'] = True
         column_window.quit()
-        column_window.destroy()
 
     s.configure('Custom.TButton',
                 font=('Cascadia Code', 10, 'bold'),
@@ -689,14 +725,21 @@ def choose_file_and_columns(id_mode=False):
     ttk.Button(column_window, text="Start", width=20, style='Custom.TButton', command=on_select).pack(pady=10)
 
     def on_close():
-        column_window.destroy()
-        sys.exit(0)
+        column_window.quit()
+
     column_window.protocol("WM_DELETE_WINDOW", on_close)
-    column_window.bind('<Escape>', lambda e: on_close())
-    column_window.bind('<Return>', lambda e: on_select())  # Enter confirms, not exits
+    column_window.bind('<Escape>', lambda _: on_close())
+    column_window.bind('<Return>', lambda _: on_select())
 
     column_window.mainloop()
-    return file_path, selected_id.get(), selected_price.get(), column_names, total_rows
+    try:
+        column_window.destroy()
+    except tk.TclError:
+        pass
+
+    if not selection['confirmed']:
+        return None, None, None, None, None
+    return file_path, selection['id'], selection['price'], column_names, total_rows
 
 
 def show_progress_bar(total_count, progress_queue, finish_callback):
@@ -755,14 +798,6 @@ def show_progress_bar(total_count, progress_queue, finish_callback):
         return f"{h:02}:{m:02}:{s:02}"
 
     processed_count = 0
-    _done = [False]
-
-    def _finish():
-        if _done[0]:
-            return
-        _done[0] = True
-        root.destroy()
-        finish_callback()
 
     def check_queue():
         nonlocal processed_count
@@ -772,7 +807,8 @@ def show_progress_bar(total_count, progress_queue, finish_callback):
                 progress_queue.task_done()
                 # Якщо отримали None — це фінальний сигнал
                 if item is None:
-                    _finish()
+                    root.destroy()
+                    finish_callback()
                     return
                 # Інакше item має бути 1 (крок прогресу)
                 processed_count += item
@@ -786,7 +822,8 @@ def show_progress_bar(total_count, progress_queue, finish_callback):
         timer_label.config(text=f"Total runtime: {format_elapsed(elapsed_seconds)}")
         # Якщо вже досягли або перевищили total_count, завершити
         if processed_count >= total_count:
-            _finish()
+            root.destroy()
+            finish_callback()
         else:
             root.after(100, check_queue)
     ttk.Button(container, text="Cancel", style='Exit.TButton', command=restart_program).pack(pady=(10, 0))
@@ -794,15 +831,15 @@ def show_progress_bar(total_count, progress_queue, finish_callback):
         root.destroy()
         sys.exit(0)
     root.protocol("WM_DELETE_WINDOW", on_close)
-    root.bind('<Escape>', lambda e: on_close())
-    root.bind('<Return>', lambda e: on_close())
+    root.bind('<Escape>', lambda _: on_close())
+    root.bind('<Return>', lambda _: on_close())
 
     root.after(100, check_queue)
     root.mainloop()
 
 #-------------------- Показати підсумок роботи програми -------------------
 
-def show_summary(total_rows_written, time_str, results_file, blocks, not_found):
+def show_summary(total_rows_written, time_str, results_file, not_found):
     win = tk.Tk()
     win.title("Process Completed")
     win.resizable(False, False)
@@ -845,8 +882,8 @@ def show_summary(total_rows_written, time_str, results_file, blocks, not_found):
     # msg5.pack(pady=(0, 10))
 
     def close():
-        win.quit()
-        win.after(10, sys.exit, 0)
+        win.destroy()
+        sys.exit(0)
     
     def on_restart():
         win.destroy()
@@ -890,7 +927,7 @@ def show_summary(total_rows_written, time_str, results_file, blocks, not_found):
     ttk.Button(container, text="Open results", width = 20, style='Open.TButton', command=open_file).pack(pady=(10, 0))
 
 
-    win.bind('<Return>', lambda e: close())
-    win.bind('<Escape>', lambda e: close())
+    win.bind('<Return>', lambda _: close())
+    win.bind('<Escape>', lambda _: close())
 
     win.mainloop()

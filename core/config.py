@@ -3,12 +3,8 @@ import base64
 import time
 import logging
 
-# Walmart Marketplace API credentials
-# Зберігаються тут (в оновлюваному core), а не в launcher.exe
-CLIENT_ID = "2f04b7d6-4f0e-42fd-9e3b-d8379611aa7f"
-CLIENT_SECRET = "QMkI2QWJ4nN4jsXAJpigHmMl_UEWYGyqnlADVTOh_ppqpghObi21EI6nxgEKosdVfjw4hEPwVg0v2z5iWO-15A"
-AUTH_BASE64 = base64.b64encode(f"{CLIENT_ID}:{CLIENT_SECRET}".encode()).decode()
-
+# API credentials та шляхи
+AUTH_BASE64 = os.environ.get("AUTH_BASE64", "")
 TOKEN_URL = "https://marketplace.walmartapis.com/v3/token"
 
 # Шляхи збереження
